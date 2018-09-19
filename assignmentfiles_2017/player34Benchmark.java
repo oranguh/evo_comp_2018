@@ -5,36 +5,24 @@ import java.util.Random;
 import java.util.Properties;
 import java.util.Arrays;
 
+
 public class player34 implements ContestSubmission
 {
 	Random rnd_;
 	ContestEvaluation evaluation_;
     private int evaluations_limit_;
 	
+
 	public player34()
 	{
 		rnd_ = new Random();
 	}
+
 	
 	public void setSeed(long seed)
 	{
 		// Set seed of algortihms random process
 		rnd_.setSeed(seed);
-	}
-
-	private double[][] initializePopulation(int populationSize)
-	{
-        double[][] populationMatrix = new double[populationSize][10];
-    
-        for (int row = 0; row < populationMatrix.length; row++)
-        {	
-        	for (int col = 0; col < populationMatrix[row].length; col++)
-        	{
-				populationMatrix[row][col] = (int)(Math.random()*11) - 5;
-        	}
-        }
-        // System.out.println(Arrays.toString(fitnessArray));
-        return populationMatrix;
 	}
 
 
@@ -54,7 +42,7 @@ public class player34 implements ContestSubmission
 	{ //TODO: In case of array with same numbers - how to treat? 
 
 		double[] hitList = new double[evaluationArray.length];
-		double median = calculateMedian(evaluationArray);
+		double median = Utils.calculateMedian(evaluationArray);
 		int count = 0;
 
 		for (int row = 0; row < evaluationArray.length; row++)
@@ -73,34 +61,6 @@ public class player34 implements ContestSubmission
 	}
 
 
-	private double[] deepCopy(double[] numArray)
-	{
-		double[] copyArray = new double [numArray.length];
-		for (int row = 0; row < copyArray.length; row++)
-        {	
-        	copyArray[row] = numArray[row];
-        }
-        return copyArray;
-	}
-
-
-	private double calculateMedian(double[] numArray)
-	{
-		// Create a copy of numArray
-		double[] sortedArray = deepCopy(numArray);
-
-        // Calculate median
-		Arrays.sort(sortedArray);
-		double median;
-		if (sortedArray.length % 2 == 0)
-		    median = ((double)sortedArray[sortedArray.length/2] + (double)sortedArray[sortedArray.length/2 - 1])/2;
-		else
-		    median = (double) sortedArray[sortedArray.length/2];
-  
-        return median;
-	}
-
-
 	private double[][] selectNewGeneration(double[][] populationMatrix, double[] hitList)
 	{
 		double[][] newPopulation = new double[populationMatrix.length][10];
@@ -110,8 +70,7 @@ public class player34 implements ContestSubmission
         {
         	if (hitList[idx] == 1)
         	{
-        		newPopulation[counter] = deepCopy(populationMatrix[idx]);
-        		// create babies
+        		newPopulation[counter] = Utils.deepCopy(populationMatrix[idx]);
         		newPopulation[counter + 1] = mutantChild(newPopulation[counter]);
 
         		counter += 2;
@@ -171,26 +130,32 @@ public class player34 implements ContestSubmission
 		// Run your algorithm here
         
         int evals = 0;
-
-        // init population
         int populationSize = 10;
-        double[][] populationMatrix = initializePopulation(populationSize);
+        double diversity;
+        double[][] populationMatrix = Utils.initializePopulation(populationSize);
         double[] evalArray = new double[populationSize];
         double[] hitList = new double[populationSize];
+        double[] diversityArray = new double[evaluations_limit_ / populationSize];
+
 
         // calculate fitness
-        for (int idx = 0; idx < 1000; idx++)
+        for (int idx = 0; idx <  evaluations_limit_ / populationSize; idx++)
         {
         	evalArray = evaluatePopulation(populationMatrix);
+        	diversityArray[idx] = Utils.evaluateSimilarity(populationMatrix);
 
         	hitList = selectTop5inPopulation(evalArray);
-        	System.out.println(Arrays.toString(evalArray));
+
+        	System.out.println(Arrays.deepToString(populationMatrix));
+        	//System.out.println(Arrays.toString(evalArray));
+
         	populationMatrix = selectNewGeneration(populationMatrix, hitList);
+
         	System.out.println(evals);
         	evals++;
         }
-
-
+        // System.out.println(Arrays.toString(diversityArray));
+        
 
         // while(evals < evaluations_limit_){
         //     // Select parents
