@@ -51,7 +51,7 @@ public class player34 implements ContestSubmission
         
         int evals = 0;
         // init population
-		individual hello = new individual();
+        
         // calculate fitness
         while(evals<evaluations_limit_){
             // Select parents
