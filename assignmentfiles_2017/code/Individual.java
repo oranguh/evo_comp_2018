@@ -27,7 +27,8 @@ public class Individual {
 
 	public void evaluate () {
 		if (this.fitness == -1.0) {
-			this.fitness = Math.max(0, (double) player34.evaluation_.evaluate(this.genes));
+			double x = (double) player34.evaluation_.evaluate(this.genes);
+			this.fitness = Math.max(0, x);
 		}
 	}
 }
