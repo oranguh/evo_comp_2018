@@ -19,12 +19,12 @@ public class Population {
     public void print () { this.print(false); }
     public void print (boolean withGenes)
     {
-    	System.out.println("Population:");
+    	Debug.println("Population:");
     	for (Individual individual : this.individuals) {
     		if (withGenes) {
-    			System.out.printf("Fitness: %g Mutation rate: %g Genes: %s\n", individual.fitness, individual.mutationRate, Arrays.toString(individual.genes));
+    			Debug.printf("Fitness: %g Mutation rate: %g Genes: %s\n", individual.fitness, individual.mutationRate, Arrays.toString(individual.genes));
     		} else {
-    			System.out.printf("Fitness: %g Mutation rate: %g \n", individual.fitness, individual.mutationRate);
+    			Debug.printf("Fitness: %g Mutation rate: %g \n", individual.fitness, individual.mutationRate);
     		}
     	}
     }

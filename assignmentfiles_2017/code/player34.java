@@ -25,9 +25,6 @@ public class player34 implements ContestSubmission
     public static int populationSize_ = 30;
     public static int parentCountPerGeneration_ = 5;
 
-    // administrative stuff
-    private static final PrintStream oldOut_ = System.out;
-
     // provided fields (do not touch)
 	public static Random rnd_;
 	public static ContestEvaluation evaluation_;
@@ -39,8 +36,8 @@ public class player34 implements ContestSubmission
 
         // Disable console output for competition environment
         // Start with -Dprint flag to enable
-        if (System.getProperty("print") == null) {
-            disableConsolePrinting();
+        if (System.getProperty("print") != null) {
+            Debug.isOutputEnabled = true;
         }
 
         // set population size
@@ -53,23 +50,6 @@ public class player34 implements ContestSubmission
             parentCountPerGeneration_ = Integer.parseInt(System.getProperty("parentcount"));
         }
 	}
-
-    private void programEndOperations () {
-        // enable console printing again for final output of program (doesn't affect online ranking)
-        enableConsolePrinting();
-    }
-
-    private static void disableConsolePrinting () {
-        System.setOut(new PrintStream(new OutputStream() {
-            public void write(int b) {
-                //DO NOTHING
-            }
-        }));
-    }
-
-    private static void enableConsolePrinting () {
-        System.setOut(oldOut_);
-    }
 
 	public void setSeed(long seed)
 	{
@@ -142,14 +122,11 @@ public class player34 implements ContestSubmission
 
             // optionally print statistics sometimes
 	        if (evaluationCount % (evaluations_limit_/10) == 0) {
-	        	System.out.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
+	        	Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
 	        	population.print();
 	        }
         }
-        System.out.println("We're done here");
+        Debug.println("We're done here");
         population.print(true);
-
-        // java has no destructor, so explicitly call this here
-        programEndOperations();
 	}
 }
