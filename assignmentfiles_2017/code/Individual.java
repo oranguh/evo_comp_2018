@@ -9,8 +9,9 @@ public class Individual {
 		this.mutationRate = 1.0;
 		this.genes = new double[10];
 		// initialize with random genes
+		double problemRange = player34.PROBLEM_RANGE_MAX - player34.PROBLEM_RANGE_MIN;
 		for (int i=0; i<genes.length; i++) {
-			double allele = player34.rnd_.nextDouble() * (player34.PROBLEM_RANGE_MAX - player34.PROBLEM_RANGE_MIN);
+			double allele = player34.rnd_.nextDouble() * problemRange - (problemRange/2.0);
     		this.genes[i] = allele;
 		}
 	}
