@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Population {
@@ -16,16 +15,11 @@ public class Population {
 		this.individuals.addAll(newcomers);
 	}
 
-    public void print () { this.print(false); }
-    public void print (boolean withGenes)
+    public void print ()
     {
     	Debug.println("Population:");
     	for (Individual individual : this.individuals) {
-    		if (withGenes) {
-    			Debug.printf("Fitness: %g Mutation rate: %g Genes: %s\n", individual.fitness, individual.mutationRate, Arrays.toString(individual.genes));
-    		} else {
-    			Debug.printf("Fitness: %g Mutation rate: %g \n", individual.fitness, individual.mutationRate);
-    		}
+    		Debug.println(individual);
     	}
     }
 

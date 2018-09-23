@@ -7,11 +7,17 @@ public class Debug {
 			System.out.print(str);
 		}
 	}
+	public static void print (Object obj) {
+		Debug.print(obj.toString());
+	}
 
 	public static void println (String str) {
 		if (isOutputEnabled) {
 			System.out.println(str);
 		}
+	}
+	public static void println (Object obj) {
+		Debug.println(obj.toString());
 	}
 
 	public static void printf (String str, Object... args) {

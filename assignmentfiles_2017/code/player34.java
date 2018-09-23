@@ -83,20 +83,26 @@ public class player34 implements ContestSubmission
     private List<Individual> reproduce (List<Individual> parents)
     {
     	List<Individual> children = new ArrayList<Individual>();
+        // Each parent generates one child by just mutation (gaussian noise)
     	for (Individual parent : parents) {
+            // Copy parent
     		Individual child = new Individual(parent);
-            child.fitness = -1.0; // fitness is not inherited and will need to be re-evaluated
-            double tau = Math.pow(PROBLEM_DIMENSIONALITY, -0.5);
+            // Reset fitness causing the child fitness to be evaluated later
+            child.resetFitness();
+            // First, re-sample mutation rate (sigma)
+            double tau = Math.sqrt(PROBLEM_DIMENSIONALITY);
             child.mutationRate = parent.mutationRate * Math.exp(tau * rnd_.nextGaussian());
+            // Then, sample gaussian and apply to each gene
 			for (int i=0; i<child.genes.length; i++) {
 				double mutation = 0.0;
                 boolean willGoOutOfBounds = true;
+                // Keep re-sampling gaussian until mutation stays within problem domain
 				do {
                     mutation = rnd_.nextGaussian() * child.mutationRate;
                     double x = child.genes[i] + mutation;
                     willGoOutOfBounds = x <= PROBLEM_RANGE_MIN || x >= PROBLEM_RANGE_MAX;
-                    //Debug.printf("gene: %g mutation rate: %g mutation: %g x: %g\n", child.genes[i], child.mutationRate, mutation, x);
                 } while (willGoOutOfBounds);
+                // Apply mutation
 				child.genes[i] += mutation;
 			}
 			children.add(child);
@@ -112,7 +118,8 @@ public class player34 implements ContestSubmission
         population.print();
 
         int evaluationCount = populationSize_;
-        while (evaluationCount+parentCountPerGeneration_ < evaluations_limit_) {
+        boolean hasRunOutOfEvaluations = false;
+        do {
             // Select parents
         	List<Individual> parents = population.weightedRandomDraw(parentCountPerGeneration_);
             // Apply crossover / mutation operators
@@ -129,8 +136,8 @@ public class player34 implements ContestSubmission
 	        	Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
 	        	population.print();
 	        }
-        }
-        Debug.println("We're done here");
-        population.print(true);
+
+            hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
+        } while (!hasRunOutOfEvaluations);
 	}
 }
