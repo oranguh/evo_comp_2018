@@ -1,0 +1,6 @@
+
+assignmentfiles_2017/*.class
+!assignmentfiles_2017/BentCigarFunction.class
+!assignmentfiles_2017/KatsuuraEvaluation.class
+!assignmentfiles_2017/SchaffersEvaluation.class
+!assignmentfiles_2017/SphereEvaluation.class
