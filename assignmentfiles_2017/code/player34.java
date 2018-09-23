@@ -89,10 +89,14 @@ public class player34 implements ContestSubmission
             double tau = Math.pow(PROBLEM_DIMENSIONALITY, -0.5);
             child.mutationRate = parent.mutationRate * Math.exp(tau * rnd_.nextGaussian());
 			for (int i=0; i<child.genes.length; i++) {
-				double mutation = rnd_.nextGaussian() * child.mutationRate;
-				if (Math.abs(child.genes[i] + mutation) >= 5.0) {
-					mutation *= -1.0;
-				}
+				double mutation = 0.0;
+                boolean willGoOutOfBounds = true;
+				do {
+                    mutation = rnd_.nextGaussian() * child.mutationRate;
+                    double x = child.genes[i] + mutation;
+                    willGoOutOfBounds = x <= PROBLEM_RANGE_MIN || x >= PROBLEM_RANGE_MAX;
+                    //Debug.printf("gene: %g mutation rate: %g mutation: %g x: %g\n", child.genes[i], child.mutationRate, mutation, x);
+                } while (willGoOutOfBounds);
 				child.genes[i] += mutation;
 			}
 			children.add(child);
