@@ -35,9 +35,21 @@ public class player34 implements ContestSubmission
 		rnd_ = new Random();
 
         // Disable console output for competition environment
-        // Start with -Dprint flag to enable
-        if (System.getProperty("print") != null) {
+        // Start with "java -Ddebug -jar ..." to enable
+        if (System.getProperty("debug") != null) {
             Debug.isOutputEnabled = true;
+        }
+
+        // Use to write to file through redirected console output
+        // Start with "java -Dcsv -jar ... > filename.csv" to enable
+        if (System.getProperty("csv") != null) {
+            Csv.isOutputEnabled = true;
+        }
+
+        // Since file writing uses redirected console output, Debug and Csv conflict
+        if (Debug.isOutputEnabled && Csv.isOutputEnabled) {
+            System.err.println("Cannot use -Ddebug and -Dcsv at the same time.");
+            System.exit(-1);
         }
 
         // set population size
@@ -50,6 +62,14 @@ public class player34 implements ContestSubmission
             parentCountPerGeneration_ = Integer.parseInt(System.getProperty("parentcount"));
         }
 	}
+
+    private static void disableConsolePrinting () {
+        System.setOut(new PrintStream(new OutputStream() {
+            public void write(int b) {
+                //DO NOTHING
+            }
+        }));
+    }
 
 	public void setSeed(long seed)
 	{
@@ -117,6 +137,9 @@ public class player34 implements ContestSubmission
         population.evaluate();
         population.print();
 
+        // Print CSV header
+        Csv.printHeader("step", "totalsteps", "fitness0");
+
         int evaluationCount = populationSize_;
         boolean hasRunOutOfEvaluations = false;
         do {
@@ -135,9 +158,16 @@ public class player34 implements ContestSubmission
 	        if (evaluationCount % (evaluations_limit_/10) == 0) {
 	        	Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
 	        	population.print();
+                Csv.printData(evaluationCount, evaluations_limit_, population.individuals.get(0).fitness);
 	        }
 
             hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
         } while (!hasRunOutOfEvaluations);
+
+        // When printing to csv is enabled, prevent the end of 
+        // the program from adding garbage to it by printing stuff (results etc)
+        if (Csv.isOutputEnabled) {
+            disableConsolePrinting();
+        }
 	}
 }
