@@ -138,7 +138,7 @@ public class player34 implements ContestSubmission
         population.print();
         population.getAverageDistanceFromMean();
         // Print CSV header
-        Csv.printHeader("Evaluations", "MaxFitness", "Diversity");
+        Csv.printHeader("Evaluations", "Max fitness", "Diversity", "Mutation rate");
 
         int evaluationCount = populationSize_;
         boolean hasRunOutOfEvaluations = false;
@@ -162,7 +162,7 @@ public class player34 implements ContestSubmission
             
             // Print to file 100 times
             if (evaluationCount % (evaluations_limit_/100) == 0) {
-                Csv.printData(evaluationCount, population.getMaxFitness(), population.getAverageDistanceFromMean());
+                Csv.printData(evaluationCount, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
             }
 
             hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;

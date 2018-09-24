@@ -36,19 +36,29 @@ means = metrics.mean(axis=2)
 colors = ['black', 'tab:red', 'tab:blue', 'tab:green', 'gray'] # more than 4 metrics? fuck you
 
 # Plot each metric
-fig, axis = plt.subplots()
-axis.set_xlabel(metricNames[0], color=colors[0])
+plots = []
+fig, host = plt.subplots()
+host.set_xlabel(metricNames[0], color=colors[0])
+axis = host
 for i in range(1, metrics.shape[1]):
+	axis.spines['top'].set_visible(False)
 	axis.set_ylabel(metricNames[i], color=colors[i])
 	axis.tick_params(axis='y', labelcolor=colors[i])
 	axis.plot(means[:,0], metrics[:,i,:], color=colors[i], alpha=0.1)
-	axis.plot(means[:,0], means[:,i], color=colors[i], alpha=1.0, label=metricNames[i])
+	p, = axis.plot(means[:,0], means[:,i], color=colors[i], alpha=1.0, label=metricNames[i])
+	plots.append(p)
 	if i < metrics.shape[1]-1:
-		axis = axis.twinx()
+		axis = host.twinx()
+		# thing = axis.get_grid_helper().new_fixed_axis
+		# axis.axis["right"] = thing(loc="right", axes=axis, offset=(0.1*(i-1), 0))
+		# axis.axis["right"].toggle(all=True)
+		axis.spines["right"].set_position(('outward', 50*(i-1)))
 
 # Some further layout
 plt.title(args.title)
-plt.legend()
+#plt.legend(plots, [p.get_label() for p in plots])
+fig.tight_layout()
 
 # Save to file
 plt.savefig(args.dst, bbox_inches='tight')
+plt.show()
