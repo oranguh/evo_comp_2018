@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 public class Population {
 	public List<Individual> individuals;
@@ -53,5 +55,43 @@ public class Population {
 			}
 		}
 		return chosenOnes;
+    }
+
+    public double getMaxFitness () {
+    	double maxFitness = 0.0;
+    	for (Individual individual : this.individuals) {
+    		maxFitness = Math.max(maxFitness, individual.fitness);
+    	}
+    	return maxFitness;
+    }
+
+    public double getAverageFitness () {
+    	double totalFitness = 0.0;
+    	for (Individual individual : this.individuals) {
+    		totalFitness += individual.fitness;
+    	}
+    	return totalFitness / this.individuals.size();
+    }
+
+    public double getAverageDistanceFromMean () {
+    	// As some sort of diversity metric
+    	int n = this.individuals.size();
+    	// Find mean
+    	double[] mean = new double[10];
+    	Arrays.fill(mean, 0.0);
+    	for (Individual individual : this.individuals) {
+    		Arrays.setAll(mean, i -> mean[i] + individual.genes[i]/n);
+    	}
+
+    	// Calculate distance from mean
+    	double averageDistanceFromMean = 0.0;
+    	for (Individual individual : this.individuals) {
+	    	double[] distances = new double[10];
+	    	Arrays.fill(distances, 0.0);
+    		Arrays.setAll(distances, i -> Math.pow(mean[i] - individual.genes[i],2));
+    		double euclideanDistance = Math.sqrt(DoubleStream.of(distances).sum());
+    		averageDistanceFromMean += euclideanDistance/n;
+    	}
+    	return averageDistanceFromMean;
     }
 }

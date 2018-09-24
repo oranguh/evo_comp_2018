@@ -136,9 +136,9 @@ public class player34 implements ContestSubmission
         Population population = new Population(populationSize_);
         population.evaluate();
         population.print();
-
+        population.getAverageDistanceFromMean();
         // Print CSV header
-        Csv.printHeader("step", "totalsteps", "fitness0");
+        Csv.printHeader("Evaluations", "MaxFitness", "Diversity");
 
         int evaluationCount = populationSize_;
         boolean hasRunOutOfEvaluations = false;
@@ -154,12 +154,16 @@ public class player34 implements ContestSubmission
             // Select survivors
             population.individuals = population.weightedRandomDraw(populationSize_);
 
-            // optionally print statistics sometimes
+            // Debug print 10 times
 	        if (evaluationCount % (evaluations_limit_/10) == 0) {
 	        	Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
 	        	population.print();
-                Csv.printData(evaluationCount, evaluations_limit_, population.individuals.get(0).fitness);
-	        }
+            }
+            
+            // Print to file 100 times
+            if (evaluationCount % (evaluations_limit_/100) == 0) {
+                Csv.printData(evaluationCount, population.getMaxFitness(), population.getAverageDistanceFromMean());
+            }
 
             hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
         } while (!hasRunOutOfEvaluations);
