@@ -34,8 +34,9 @@ then
 	exit 1
 fi
 
-# Run each evaluation runCount times with different seeds (parallel doesn't work atm because of javabbob file access)
-evalNames=( "BentCigarFunction" "SchaffersEvaluation" "KatsuuraEvaluation" )
+# Run each evaluation runCount times with different seeds
+# (parallel doesn't work atm because of javabbob file access shenanigans)
+evalNames=( "BentCigarFunction" "SchaffersEvaluation" ) #"KatsuuraEvaluation" )
 for evalName in "${evalNames[@]}"
 do
 	mkdir -p "tests/${testName}/${evalName}"
@@ -45,7 +46,13 @@ do
 		java -Dcsv -jar testrun.jar -submission=player34 -evaluation="${evalName}" -seed="${seed}" > "tests/${testName}/${evalName}/metrics_${seed}.csv"
 	done
 	wait
+	# Run python script that loads csv files for each evaluation and plots metrics
+	python plot.py "tests/${testName}/${evalName}" "tests/${testName}/${testName}.${evalName}.png" "${testName}: ${evalName}"
 done
-echo "Complete"
 
-# Run python script that loads csv files for each evaluation and plots metrics avg with stddev to tests/testName/testName.evalname.png
+# Open the image files
+for evalName in "${evalNames[@]}"
+do
+	display "tests/${testName}/${testName}.${evalName}.png" &
+done
+
