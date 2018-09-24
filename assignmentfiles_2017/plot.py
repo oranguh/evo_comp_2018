@@ -58,4 +58,3 @@ fig.tight_layout()
 
 # Save to file
 plt.savefig(args.dst, bbox_inches='tight')
-plt.show()
