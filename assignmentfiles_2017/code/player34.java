@@ -136,9 +136,12 @@ public class player34 implements ContestSubmission
         Population population = new Population(populationSize_);
         population.evaluate();
         population.print();
-        population.getAverageDistanceFromMean();
+
         // Print CSV header
         Csv.printHeader("Evaluations", "Max fitness", "Diversity", "Mutation rate");
+        
+        // Add data point of initial population
+        Csv.printData(populationSize_, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
 
         int evaluationCount = populationSize_;
         boolean hasRunOutOfEvaluations = false;
