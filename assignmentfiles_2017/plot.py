@@ -41,7 +41,7 @@ fig, host = plt.subplots()
 host.set_xlabel(metricNames[0], color=colors[0])
 axis = host
 for i in range(1, metrics.shape[1]):
-	axis.spines['top'].set_visible(False)
+	# axis.spines['top'].set_visible(False)
 	axis.set_ylabel(metricNames[i], color=colors[i])
 	axis.tick_params(axis='y', labelcolor=colors[i])
 	axis.plot(means[:,0], metrics[:,i,:], color=colors[i], alpha=0.1)
@@ -49,9 +49,6 @@ for i in range(1, metrics.shape[1]):
 	plots.append(p)
 	if i < metrics.shape[1]-1:
 		axis = host.twinx()
-		# thing = axis.get_grid_helper().new_fixed_axis
-		# axis.axis["right"] = thing(loc="right", axes=axis, offset=(0.1*(i-1), 0))
-		# axis.axis["right"].toggle(all=True)
 		axis.spines["right"].set_position(('outward', 50*(i-1)))
 
 # Some further layout
