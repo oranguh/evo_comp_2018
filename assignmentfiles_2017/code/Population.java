@@ -31,7 +31,7 @@ public class Population {
     	}
     }
 
-    public List<Individual> weightedRandomDraw(int drawCount) {
+    public List<Individual> fitnessProportionalSelection (int drawCount) {
 		List<Individual> populationCopy = new ArrayList<Individual>(this.individuals);
 		List<Individual> chosenOnes = new ArrayList<Individual>();
 		
