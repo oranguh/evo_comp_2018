@@ -141,6 +141,7 @@ public class player34 implements ContestSubmission
         Csv.printHeader("Evaluations", "Max fitness", "Diversity", "Mutation rate");
         
         // Add data point of initial population
+        Debug.printf("Evaluation count: %d / %d\n", populationSize_, evaluations_limit_);
         Csv.printData(populationSize_, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
 
         int evaluationCount = populationSize_;
