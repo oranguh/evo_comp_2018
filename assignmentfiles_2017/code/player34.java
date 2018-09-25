@@ -148,7 +148,7 @@ public class player34 implements ContestSubmission
         boolean hasRunOutOfEvaluations = false;
         do {
             // Select parents
-        	List<Individual> parents = population.fitnessProportionalSelection(parentCountPerGeneration_);
+        	List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true);
             // Apply crossover / mutation operators
             List<Individual> children = reproduce(parents);
             population.addAll(children);
@@ -156,7 +156,7 @@ public class player34 implements ContestSubmission
             population.evaluate(); // skips those who already have been evaluated
             evaluationCount += parentCountPerGeneration_; // same as number of children atm
             // Select survivors
-            population.individuals = population.fitnessProportionalSelection(populationSize_);
+            population.individuals = population.tournamentSelection(populationSize_, 5, true);
 
             // Debug print 10 times
 	        if (evaluationCount % (evaluations_limit_/10) == 0) {
