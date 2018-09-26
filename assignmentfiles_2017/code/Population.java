@@ -56,6 +56,37 @@ public class Population {
 		}
 		return chosenOnes;
     }
+    
+    public List<Individual> tournamentSelection (int drawCount, int k, boolean withReplacement) {
+        List<Individual> populationCopy;
+        List<Individual> competitionPool = new ArrayList<Individual>();
+        List<Individual> chosenOnes = new ArrayList<Individual>();
+        Individual randomIndividual, winner;
+        double highestFitness;
+        
+        for (int i = 0; i < drawCount; i++) {
+            populationCopy = new ArrayList<Individual>(this.individuals);
+            competitionPool.clear();
+
+            // Choose k random individuals and add to competition pool,
+            // withReplacement bool indicates whether individuals can be
+            // added repeatedly to the same tournament
+            for (int j = 0; j < k; j++) {
+                randomIndividual = populationCopy.get(player34.rnd_.nextInt(populationCopy.size()));
+                if (!withReplacement)  populationCopy.remove(randomIndividual);
+                competitionPool.add(randomIndividual);
+            }
+
+            // Compare these k individuals and select the best of them;
+            winner = competitionPool.get(0);
+            for (Individual individual : competitionPool) {
+                if (individual.fitness > winner.fitness)  winner = individual;
+            }
+            chosenOnes.add(winner);
+        }
+
+        return chosenOnes;       
+    }    
 
     public double getMaxFitness () {
     	double maxFitness = 0.0;
