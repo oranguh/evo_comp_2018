@@ -57,6 +57,14 @@ public class Population {
 		return chosenOnes;
     }
     
+    public List<Individual> tournamentSelectionWithReplacement (int drawCount, int k) {
+        return tournamentSelection(drawcount, k, true);
+    }
+
+    public List<Individual> tournamentSelectionWithoutReplacement (int drawCount, int k) {
+        return tournamentSelection(drawcount, k, false);
+    }
+
     public List<Individual> tournamentSelection (int drawCount, int k, boolean withReplacement) {
         List<Individual> populationCopy;
         List<Individual> competitionPool = new ArrayList<Individual>();
