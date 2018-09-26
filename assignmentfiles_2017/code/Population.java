@@ -70,7 +70,6 @@ public class Population {
         List<Individual> competitionPool = new ArrayList<Individual>();
         List<Individual> chosenOnes = new ArrayList<Individual>();
         Individual randomIndividual, winner;
-        double highestFitness;
         
         for (int i = 0; i < drawCount; i++) {
             populationCopy = new ArrayList<Individual>(this.individuals);
