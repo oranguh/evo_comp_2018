@@ -58,11 +58,11 @@ public class Population {
     }
     
     public List<Individual> tournamentSelectionWithReplacement (int drawCount, int k) {
-        return tournamentSelection(drawcount, k, true);
+        return tournamentSelection(drawCount, k, true);
     }
 
     public List<Individual> tournamentSelectionWithoutReplacement (int drawCount, int k) {
-        return tournamentSelection(drawcount, k, false);
+        return tournamentSelection(drawCount, k, false);
     }
 
     public List<Individual> tournamentSelection (int drawCount, int k, boolean withReplacement) {
@@ -71,10 +71,15 @@ public class Population {
         List<Individual> chosenOnes = new ArrayList<Individual>();
         Individual randomIndividual, winner;
         
+        // drawCount and k should not be bigger than the population size
+        //if (drawCount > individuals.size() || k > individuals.size()) {
+        	//throw new IllegalArgumentException("drawCount and k should not exceed population size.");
+        //}
+        
         for (int i = 0; i < drawCount; i++) {
             populationCopy = new ArrayList<Individual>(this.individuals);
             competitionPool.clear();
-
+            
             // Choose k random individuals and add to competition pool,
             // withReplacement bool indicates whether individuals can be
             // added repeatedly to the same tournament
