@@ -58,13 +58,14 @@ public class Population {
     }
     
     public List<Individual> tournamentSelection (int drawCount, int k, boolean withReplacement) {
-        List<Individual> populationCopy = new ArrayList<Individual>(this.individuals);
+        List<Individual> populationCopy;
         List<Individual> competitionPool = new ArrayList<Individual>();
         List<Individual> chosenOnes = new ArrayList<Individual>();
         Individual randomIndividual, winner;
         double highestFitness;
         
         for (int i = 0; i < drawCount; i++) {
+            populationCopy = new ArrayList<Individual>(this.individuals);
             competitionPool.clear();
 
             // Choose k random individuals and add to competition pool,
@@ -72,18 +73,15 @@ public class Population {
             // added repeatedly to the same tournament
             for (int j = 0; j < k; j++) {
                 randomIndividual = populationCopy.get(player34.rnd_.nextInt(populationCopy.size()));
-                if (!withReplacement)  { populationCopy.remove(randomIndividual); }
+                if (!withReplacement)  populationCopy.remove(randomIndividual);
                 competitionPool.add(randomIndividual);
             }
 
             // Compare these k individuals and select the best of them;
-            winner = null;
-            highestFitness = -1.0;
-            for (Individual ind : competitionPool) {
-                if (ind.fitness > highestFitness)  winner = ind;
+            winner = competitionPool.get(0);
+            for (Individual individual : competitionPool) {
+                if (individual.fitness > winner.fitness)  winner = individual;
             }
-
-            // set mating pool[current member] = i;
             chosenOnes.add(winner);
         }
 
