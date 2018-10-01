@@ -41,8 +41,9 @@ for evalName in "${evalNames[@]}"
 do
 	mkdir -p "tests/${testName}/${evalName}"
 	echo "running ${evalName}"
-	for (( seed=1; seed<=runCount; seed++ ))
+	for (( i=1; i<=runCount; i++ ))
 	do
+		seed=$RANDOM
 		java -Dcsv -jar testrun.jar -submission=player34 -evaluation="${evalName}" -seed="${seed}" > "tests/${testName}/${evalName}/metrics_${seed}.csv"
 	done
 	wait
