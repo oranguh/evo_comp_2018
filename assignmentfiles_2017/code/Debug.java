@@ -8,7 +8,9 @@ public class Debug {
 		}
 	}
 	public static void print (Object obj) {
-		Debug.print(obj.toString());
+		if (isOutputEnabled) {
+			Debug.print(obj.toString());
+		}
 	}
 
 	public static void println (String str) {
@@ -17,7 +19,9 @@ public class Debug {
 		}
 	}
 	public static void println (Object obj) {
-		Debug.println(obj.toString());
+		if (isOutputEnabled) {
+			Debug.println(obj.toString());
+		}
 	}
 
 	public static void printf (String str, Object... args) {
