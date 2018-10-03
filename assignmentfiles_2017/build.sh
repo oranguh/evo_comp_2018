@@ -29,3 +29,8 @@ done
 printf "\nPacking following files:\n"
 printf '\t%s\n' "${newClassFiles[@]}"
 jar cmf MainClass.txt submission.jar "${newClassFiles[@]}"
+
+printf "Build complete.\n\n"
+printf "Running instance:\n"
+java -jar testrun.jar -submission=player34 -evaluation=BentCigarFunction -seed=1
+printf "\n"
