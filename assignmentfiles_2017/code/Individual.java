@@ -6,11 +6,14 @@ public class Individual {
 	public double[] genes;
 	public double mutationRate;
 	public double fitness;
+	public double fitnessShared;
 
 	public Individual () {
 		this.fitness = UNDETERMINED_FITNESS_VALUE;
+		this.fitnessShared = UNDETERMINED_FITNESS_VALUE;
 		this.mutationRate = DEFAULT_MUTATION_RATE;
 		this.genes = new double[10];
+
 		// Initialize with random genes
 		double problemRange = player34.PROBLEM_RANGE_MAX - player34.PROBLEM_RANGE_MIN;
 		for (int i=0; i<genes.length; i++) {
@@ -31,6 +34,7 @@ public class Individual {
 		// undo it later because we're a motherfucking copy 
 		// constructor over here
 		this.fitness = that.fitness;
+		this.fitnessShared = that.fitnessShared;
 	}
 
 	public void evaluate () {
@@ -44,14 +48,20 @@ public class Individual {
 	public void resetFitness () {
 		// Individual fitness is not evaluated unless it is this value
 		this.fitness = UNDETERMINED_FITNESS_VALUE;
+		this.fitnessShared = UNDETERMINED_FITNESS_VALUE;
 	}
 
 	@Override
 	public String toString() {
-		String geneString = "";
 		for (double gene : this.genes) {
 			geneString += String.format(" %.2f", gene);
 		}
+		return java.util.Arrays.toString(this.genes);
 		return String.format("F %.3g   σ %.3g   [%s ]", this.fitness, this.mutationRate, geneString);
 	}
 }
+
+
+
+
+

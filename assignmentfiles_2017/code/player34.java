@@ -22,8 +22,10 @@ public class player34 implements ContestSubmission
     public static final int PROBLEM_RANGE_MAX = 5;
 
     // configurable parameters
-    public static int populationSize_ = 30;
+    public static int populationSize_ = 10;
     public static int parentCountPerGeneration_ = 5;
+    public static boolean sharedFitness = true;
+    public static int sigmaShare = 15;
 
     // provided fields (do not touch)
 	public static Random rnd_;
@@ -131,10 +133,10 @@ public class player34 implements ContestSubmission
     }
     
 	public void run()
-	{
+	{  
         // Initialize population
         Population population = new Population(populationSize_);
-        population.evaluate();
+        population.evaluate(sharedFitness, sigmaShare);
         population.print();
 
         // Print CSV header
@@ -148,15 +150,15 @@ public class player34 implements ContestSubmission
         boolean hasRunOutOfEvaluations = false;
         do {
             // Select parents
-        	List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true);
+        	List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
             // Apply crossover / mutation operators
             List<Individual> children = reproduce(parents);
             population.addAll(children);
             // Check fitness of unknown fuction
-            population.evaluate(); // skips those who already have been evaluated
+            population.evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
             evaluationCount += parentCountPerGeneration_; // same as number of children atm
             // Select survivors
-            population.individuals = population.tournamentSelection(populationSize_, 5, true);
+            population.individuals = population.tournamentSelection(populationSize_, 5, true, sharedFitness);
 
             // Debug print 10 times
 	        if (evaluationCount % (evaluations_limit_/10) == 0) {
