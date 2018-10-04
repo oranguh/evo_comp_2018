@@ -130,6 +130,45 @@ public class player34 implements ContestSubmission
     	return children;
     }
     
+    // 1-point recombination for m parents. This function uses an associated 
+    // 'parentGroup' class defined below. First paremeter is list of parents to 
+    // recombine and second parameter is n in n-point recombination
+    public List<Individual> recombine(List<Individual> parents, int arity)
+    {
+        //if (arity > parents.size()) {
+            //throw new IllegalArgumentException("Jon: recombine() called with illegal arguments.");
+        //}        
+        
+    	// Initialize empty list of kids
+        List<Individual> children = new ArrayList<Individual>();
+        
+        // parentGroups are like pairs of parents but generalized to m
+        // members, where m = arity. parentGroups is a list of these.
+        List<List<Individual>> parentGroups = new ArrayList<List<Individual>>();
+        List<Individual> parentGroup  = new ArrayList<Individual>();
+        
+        // Get number of parents. If there's an 'unpairable' set of size < m 
+        // then just ignore these
+        int mParents = parents.size();
+        mParents = mParents - (mParents % arity);  // ignore unpairables
+        
+        // Add parents to reproductive groups (FOR SEX)
+        int counter = 0;
+        for (int i = 0; i < mParents; i++) {
+            parentGroup.add(parents.get(i));
+            if (counter++ == arity) {
+                parentGroups.add(parentGroup);
+                counter = 0;
+            }
+        }
+        
+        // Perform 1-point crossover. Just shift all left halves one down
+        int GENE_SPLIT_POINT = Individual.NUM_GENES / 2;
+        
+        
+        return children;
+    }
+    
 	public void run()
 	{
         // Initialize population

@@ -2,6 +2,7 @@
 public class Individual {
 	private static final double UNDETERMINED_FITNESS_VALUE = -1.0;
 	private static final double DEFAULT_MUTATION_RATE = 1.0;
+	public static final int NUM_GENES = 10;
 
 	public double[] genes;
 	public double mutationRate;
@@ -10,7 +11,7 @@ public class Individual {
 	public Individual () {
 		this.fitness = UNDETERMINED_FITNESS_VALUE;
 		this.mutationRate = DEFAULT_MUTATION_RATE;
-		this.genes = new double[10];
+		this.genes = new double[NUM_GENES];
 		// Initialize with random genes
 		double problemRange = player34.PROBLEM_RANGE_MAX - player34.PROBLEM_RANGE_MIN;
 		for (int i=0; i<genes.length; i++) {
