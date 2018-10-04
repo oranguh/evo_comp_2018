@@ -96,7 +96,6 @@ public class Population {
             }
             chosenOnes.add(winner);
         }
-
         return chosenOnes;       
     }    
 

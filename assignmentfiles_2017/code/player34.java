@@ -24,6 +24,9 @@ public class player34 implements ContestSubmission
     // configurable parameters
     public static int populationSize_ = 30;
     public static int parentCountPerGeneration_ = 5;
+    public static double recombinationProbability = 1.0;  // Added by Jon
+    public static int recombinationArity = 2;             // Added by Jon
+    public static List<Integer> crossoverBoundaries;      // Added by Jon    
 
     // provided fields (do not touch)
 	public static Random rnd_;
@@ -61,6 +64,10 @@ public class player34 implements ContestSubmission
         if (System.getProperty("parentcount") != null) {
             parentCountPerGeneration_ = Integer.parseInt(System.getProperty("parentcount"));
         }
+        
+        // Added by Jon. Compute (m-1) points used for crossover once, but allow for recomputing
+        // them later in case we want to modify it on-the-fly
+        setCrossoverBoundaries(recombinationArity);
 	}
 
     private static void disableConsolePrinting () {
@@ -130,44 +137,98 @@ public class player34 implements ContestSubmission
     	return children;
     }
     
-    // 1-point recombination for m parents. This function uses an associated 
-    // 'parentGroup' class defined below. First paremeter is list of parents to 
-    // recombine and second parameter is n in n-point recombination
-    public List<Individual> recombine(List<Individual> parents, int arity)
+    // (m-1) point recombination for m parents where m is the arity
+    public static List<Individual> recombine(List<Individual> parents, int arity)
     {
         //if (arity > parents.size()) {
             //throw new IllegalArgumentException("Jon: recombine() called with illegal arguments.");
         //}        
         
-    	// Initialize empty list of kids
-        List<Individual> children = new ArrayList<Individual>();
-        
         // parentGroups are like pairs of parents but generalized to m
         // members, where m = arity. parentGroups is a list of these.
-        List<List<Individual>> parentGroups = new ArrayList<List<Individual>>();
         List<Individual> parentGroup  = new ArrayList<Individual>();
+        List<List<Individual>> parentGroups = new ArrayList<List<Individual>>();
+         
+        // Get number of parents in total recombination pool. If there's an 
+        // 'unpairable' set of size < m then just ignore these
+        int parentCount = parents.size();
+        int nIgnored = parentCount % arity;
+        parentCount = parentCount - nIgnored;
         
-        // Get number of parents. If there's an 'unpairable' set of size < m 
-        // then just ignore these
-        int mParents = parents.size();
-        mParents = mParents - (mParents % arity);  // ignore unpairables
-        
-        // Add parents to reproductive groups (FOR SEX)
+        // Add parents to reproductive groups of size m (FOR SEX)
         int counter = 0;
-        for (int i = 0; i < mParents; i++) {
+        for (int i = 0; i < parentCount; i++) {
             parentGroup.add(parents.get(i));
             if (counter++ == arity) {
                 parentGroups.add(parentGroup);
                 counter = 0;
+                parentGroup.clear();
             }
         }
         
-        // Perform 1-point crossover. Just shift all left halves one down
-        int GENE_SPLIT_POINT = Individual.NUM_GENES / 2;
+        // Initialize empty list of kids
+        List<Individual> children = new ArrayList<Individual>();
         
+        // Perform (m-1) point crossover
+        double r;  // random probability
+        for (List<Individual> pg : parentGroups) {
+            // Do the crossover with recombination probability defined at top
+            r = rnd_.nextDouble();
+            if (r < recombinationProbability) {
+                children.addAll(mMinusOnePointCrossover(pg, arity));
+            } 
+        }
         
+        // Copy a random subset of the kids (with replacement) if we ignored 
+        // some parents and thus still # kids < # parents
+        int ri;
+        for (int i = 0; i < nIgnored; i++) {
+            ri = rnd_.nextInt(children.size());
+            children.add(children.get(ri));
+        }
+        
+        // Return list of kids with kids.size == parents.size
         return children;
     }
+    
+    // Helper function to recombine().
+    private static List<Individual> mMinusOnePointCrossover(List<Individual> parentGroup, int arity) {
+        List<Individual> children = new ArrayList<Individual>();
+        Individual child;
+        int childIndex;  
+        int parentIndex;
+        int geneIndex;
+        for (childIndex = 0; childIndex < arity; childIndex++) {
+            child = new Individual();
+            geneIndex = 0;
+            parentIndex = childIndex;
+            for (int boundary : crossoverBoundaries) {
+                while (geneIndex < boundary) {
+                    child.genes[geneIndex] = parentGroup.get(parentIndex).genes[geneIndex]; 
+                }
+                parentIndex++;
+            }
+            children.add(child);
+        }
+        return children;
+    }
+
+    // This is a a setter for the public static crossoverBoundaries list
+    private static void setCrossoverBoundaries(int arity) {
+        List<Integer> boundaries = new ArrayList<Integer>();
+        // Initialize boundaries below. If the number of genes aren't evenly
+        // divisible then that'll be fixed afterwards
+        for (int i = 1; i < arity; i++) {
+            boundaries.add((Individual.NUM_GENES / arity) * i - 1);
+        }
+        // Correct boundaries if there's genes left
+        int remainder = Individual.NUM_GENES % arity;
+        for (int i = 0; i < boundaries.size(); i++) {
+            if (i < remainder)  { boundaries.set(i, boundaries.get(i) + i + 1); }
+            else  { boundaries.set(i,  boundaries.get(i) + remainder); }
+        }
+        crossoverBoundaries = boundaries;
+    }    
     
 	public void run()
 	{
