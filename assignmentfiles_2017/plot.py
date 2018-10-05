@@ -3,6 +3,7 @@ import glob
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as mpe
 
 # Get source csv folder and destination png file from program arguments
 parser = argparse.ArgumentParser()
@@ -28,6 +29,8 @@ for csvFileName in csvFileNames:
 
 # Put all csv contents into matrix
 metrics = np.dstack(fileContents)
+metricCount = metrics.shape[1]
+runCount = metrics.shape[2]
 
 # Calculate means of each metric
 means = metrics.mean(axis=2)
@@ -35,25 +38,39 @@ means = metrics.mean(axis=2)
 # Onto plotting!
 colors = ['black', 'tab:red', 'tab:blue', 'tab:green', 'gray'] # more than 4 metrics? fuck you
 
-# Plot each metric
-plots = []
+# Construct axis for each metric
 fig, host = plt.subplots()
+host.set_zorder(metricCount)
+host.patch.set_facecolor('none')
 host.set_xlabel(metricNames[0], color=colors[0])
-axis = host
-for i in range(1, metrics.shape[1]):
-	# axis.spines['top'].set_visible(False)
+host.set_ylabel(metricNames[1], color=colors[1])
+axes = [host]
+for i in range(2, metricCount):
+	# For each metric other than Fitness, set log scale
+	axis = host.twinx()
+	axis.set_zorder(metricCount-i)
+	axis.patch.set_facecolor('none')
+	axis.set_yscale('log')
+	axis.set_ylim([np.min(means[:,i]), np.max(means[:,i])])
 	axis.set_ylabel(metricNames[i], color=colors[i])
 	axis.tick_params(axis='y', labelcolor=colors[i])
-	axis.plot(means[:,0], metrics[:,i,:], color=colors[i], alpha=0.1)
-	p, = axis.plot(means[:,0], means[:,i], color=colors[i], alpha=1.0, label=metricNames[i])
-	plots.append(p)
-	if i < metrics.shape[1]-1:
-		axis = host.twinx()
-		axis.spines["right"].set_position(('outward', 50*(i-1)))
+	axis.spines["right"].set_position(('outward', 50*(i-2)))
+	axes.append(axis)
+
+# Plot vague line for each run first
+alpha = min(2.0 / runCount, 1.0)
+for i in range(1, 2):
+	axis = axes[i-1]
+	axis.plot(means[:,0], metrics[:,i,:], color=colors[i], alpha=alpha)
+
+# Plot averages as thicker lines
+outline = mpe.withStroke(linewidth=1.0, foreground='black')
+for i in reversed(range(1, metricCount)):
+	axis = axes[i-1]
+	axis.plot(means[:,0], means[:,i], color=colors[i], alpha=1.0, label=metricNames[i], path_effects=[outline])
 
 # Some further layout
 plt.title(args.title)
-#plt.legend(plots, [p.get_label() for p in plots])
 fig.tight_layout()
 
 # Save to file
