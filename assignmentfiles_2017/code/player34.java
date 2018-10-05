@@ -114,6 +114,7 @@ public class player34 implements ContestSubmission
             // First, re-sample mutation rate (sigma)
             double tau = Math.sqrt(PROBLEM_DIMENSIONALITY);
             child.mutationRate = parent.mutationRate * Math.exp(tau * rnd_.nextGaussian());
+            child.mutationRate = Math.min(child.mutationRate, 3.0);
             // Then, sample gaussian and apply to each gene
 			for (int i=0; i<child.genes.length; i++) {
 				double mutation = 0.0;
