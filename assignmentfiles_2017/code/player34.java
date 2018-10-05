@@ -24,7 +24,7 @@ public class player34 implements ContestSubmission
     // configurable parameters
     public static int populationSize_ = 10;
     public static int parentCountPerGeneration_ = 5;
-    public static boolean sharedFitness = false;
+    public static boolean sharedFitness = true;
     public static double sigmaShare = 0.001;
 
     // provided fields (do not touch)
