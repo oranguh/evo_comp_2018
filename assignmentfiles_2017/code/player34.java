@@ -24,7 +24,7 @@ public class player34 implements ContestSubmission
     // configurable parameters
     public static int populationSize_ = 30;
     public static int parentCountPerGeneration_ = 5;
-    public static double recombinationProbability = 1.0;  // Added by Jon
+    public static double recombinationProbability = 0.0;  // Added by Jon
     public static int recombinationArity = 2;             // Added by Jon
     public static List<Integer> crossoverBoundaries;      // Added by Jon    
 
@@ -138,7 +138,7 @@ public class player34 implements ContestSubmission
     }
     
     // (m-1) point recombination for m parents where m is the arity
-    public static List<Individual> recombine(List<Individual> parents, int arity)
+    public List<Individual> recombine(List<Individual> parents, int arity)
     {
         //if (arity > parents.size()) {
             //throw new IllegalArgumentException("Jon: recombine() called with illegal arguments.");
@@ -159,10 +159,11 @@ public class player34 implements ContestSubmission
         int counter = 0;
         for (int i = 0; i < parentCount; i++) {
             parentGroup.add(parents.get(i));
-            if (counter++ == arity) {
+            counter++;
+            if (counter == arity) {
                 parentGroups.add(parentGroup);
                 counter = 0;
-                parentGroup.clear();
+                parentGroup  = new ArrayList<Individual>();
             }
         }
         
@@ -174,11 +175,13 @@ public class player34 implements ContestSubmission
         for (List<Individual> pg : parentGroups) {
             // Do the crossover with recombination probability defined at top
             r = rnd_.nextDouble();
-            if (r < recombinationProbability) {
+            if (r <= recombinationProbability) {
                 children.addAll(mMinusOnePointCrossover(pg, arity));
-            } 
+            }
+            // Just just add the unchanged parents to the kids 
+            else { children.addAll(pg); }
         }
-        
+                
         // Copy a random subset of the kids (with replacement) if we ignored 
         // some parents and thus still # kids < # parents
         int ri;
@@ -192,22 +195,30 @@ public class player34 implements ContestSubmission
     }
     
     // Helper function to recombine().
-    private static List<Individual> mMinusOnePointCrossover(List<Individual> parentGroup, int arity) {
+    private List<Individual> mMinusOnePointCrossover(List<Individual> parentGroup, int arity) {
         List<Individual> children = new ArrayList<Individual>();
         Individual child;
-        int childIndex;  
-        int parentIndex;
-        int geneIndex;
+        int childIndex, parentIndex, geneIndex;
         for (childIndex = 0; childIndex < arity; childIndex++) {
             child = new Individual();
             geneIndex = 0;
             parentIndex = childIndex;
             for (int boundary : crossoverBoundaries) {
                 while (geneIndex < boundary) {
-                    child.genes[geneIndex] = parentGroup.get(parentIndex).genes[geneIndex]; 
+                    try { child.genes[geneIndex] = parentGroup.get(parentIndex).genes[geneIndex]; }
+                    catch (IndexOutOfBoundsException e) {
+                    	System.out.println("debug:");
+                    	System.out.println(child);
+                    	System.out.println(parentGroup.get(parentIndex));
+                    	System.out.println(geneIndex);
+                    	
+                    	throw e;
+                    }
+                    geneIndex++;
                 }
-                parentIndex++;
+                parentIndex = (parentIndex + 1) % arity;
             }
+            child = parentGroup.get(childIndex);
             children.add(child);
         }
         return children;
@@ -250,6 +261,7 @@ public class player34 implements ContestSubmission
             // Select parents
         	List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true);
             // Apply crossover / mutation operators
+            //List<Individual> children = recombine(parents, 2);
             List<Individual> children = reproduce(parents);
             population.addAll(children);
             // Check fitness of unknown fuction
