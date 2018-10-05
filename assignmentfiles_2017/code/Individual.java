@@ -53,10 +53,11 @@ public class Individual {
 
 	@Override
 	public String toString() {
+		String geneString = "";
 		for (double gene : this.genes) {
 			geneString += String.format(" %.2f", gene);
 		}
-		return java.util.Arrays.toString(this.genes);
+		//return java.util.Arrays.toString(this.genes);
 		return String.format("F %.3g   σ %.3g   [%s ]", this.fitness, this.mutationRate, geneString);
 	}
 }
