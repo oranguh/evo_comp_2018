@@ -23,16 +23,16 @@ public class player34 implements ContestSubmission
 
     // configurable parameters
     public static int populationSize_ = 30;
-    public static int parentCountPerGeneration_ = 4;
-    public static double recombinationProbability = 0.1;  // Added by Jon
+    public static int parentCountPerGeneration_ = 5;
+    public static double recombinationProbability = 1.0;  // Added by Jon
     public static int recombinationArity = 2;             // Added by Jon
-    public static List<Integer> crossoverBoundaries;      // Added by Jon    
 
     // provided fields (do not touch)
 	public static Random rnd_;
 	public static ContestEvaluation evaluation_;
     private int evaluations_limit_;
-	
+    public static List<Integer> crossoverBoundaries;      // Added by Jon    
+    
 	public player34()
 	{
 		rnd_ = new Random();
@@ -137,7 +137,8 @@ public class player34 implements ContestSubmission
     	return children;
     }
     
-    // (m-1) point recombination for m parents where m is the arity
+    // (m-1) point recombination for m parents where m is the arity. THis function also
+    // subdivides the input group 'parents' into subsets of size m
     public static List<Individual> recombine(List<Individual> parents, int arity)
     {
         if (arity > parents.size()) {
@@ -172,7 +173,9 @@ public class player34 implements ContestSubmission
         
         // Perform (m-1) point crossover
         double r;  // random probability
+        System.out.println("print parent groups:");
         for (List<Individual> pg : parentGroups) {
+        	System.out.println(pg);
             // Do the crossover with recombination probability defined at top
             r = rnd_.nextDouble();
             if (r <= recombinationProbability) {
@@ -252,10 +255,16 @@ public class player34 implements ContestSubmission
         int evaluationCount = populationSize_;
         boolean hasRunOutOfEvaluations = false;
         do {
+//        	System.out.println("c1");
             // Select parents
         	List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true);
             // Apply crossover / mutation operators
+        	System.out.println("parents before");
+        	System.out.println(parents);
             List<Individual> children = recombine(parents, 2);
+        	System.out.println("children after");            
+            System.out.println(children);
+            System.exit(1);
             //List<Individual> children = reproduce(parents);
             population.addAll(children);
             // Check fitness of unknown fuction
@@ -263,17 +272,20 @@ public class player34 implements ContestSubmission
             evaluationCount += parentCountPerGeneration_; // same as number of children atm
             // Select survivors
             population.individuals = population.tournamentSelection(populationSize_, 5, true);
+//        	System.out.println("c2");
 
             // Debug print 10 times
 	        if (evaluationCount % (evaluations_limit_/10) == 0) {
 	        	Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
 	        	population.print();
             }
+//        	System.out.println("c3");
             
             // Print to file 100 times
             if (evaluationCount % (evaluations_limit_/100) == 0) {
                 Csv.printData(evaluationCount, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
             }
+//        	System.out.println("c4");
 
             hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
         } while (!hasRunOutOfEvaluations);
