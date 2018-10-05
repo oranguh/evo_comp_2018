@@ -24,7 +24,7 @@ public class Population {
     	}
     }
 
-    public void evaluate (boolean shareFitness, int sigmaShare) {
+    public void evaluate (boolean shareFitness, double sigmaShare) {
     	for (Individual individual : this.individuals) {
     		individual.evaluate();
         }
@@ -33,7 +33,7 @@ public class Population {
         }
     }
     
-    private void fitnessSharing(int sigmaShare){
+    private void fitnessSharing(double sigmaShare){
         for (Individual individual_i : this.individuals){
             double sharedSum = 0.0;
             for (Individual individual_j : this.individuals){
@@ -52,7 +52,7 @@ public class Population {
         return Math.sqrt(Sum);
     }
 
-    private double sharedD(double distance, int sigmaShare){
+    private double sharedD(double distance, double sigmaShare){
         double output = 0.0;
         if (distance <= sigmaShare) output = 1 - (distance / sigmaShare);
         return output;
