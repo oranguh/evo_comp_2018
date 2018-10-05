@@ -36,7 +36,7 @@ fi
 
 # Run each evaluation runCount times with different seeds
 # (parallel doesn't work atm because of javabbob file access shenanigans)
-evalNames=( "BentCigarFunction" "SchaffersEvaluation" ) #"KatsuuraEvaluation" )
+evalNames=( "BentCigarFunction" ) #"KatsuuraEvaluation" )
 for evalName in "${evalNames[@]}"
 do
 	mkdir -p "tests/${testName}/${evalName}"

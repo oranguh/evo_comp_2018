@@ -23,8 +23,8 @@ public class player34 implements ContestSubmission
 
     // configurable parameters
     public static int populationSize_ = 30;
-    public static int parentCountPerGeneration_ = 5;
-    public static double recombinationProbability = 0.0;  // Added by Jon
+    public static int parentCountPerGeneration_ = 4;
+    public static double recombinationProbability = 0.1;  // Added by Jon
     public static int recombinationArity = 2;             // Added by Jon
     public static List<Integer> crossoverBoundaries;      // Added by Jon    
 
@@ -138,11 +138,11 @@ public class player34 implements ContestSubmission
     }
     
     // (m-1) point recombination for m parents where m is the arity
-    public List<Individual> recombine(List<Individual> parents, int arity)
+    public static List<Individual> recombine(List<Individual> parents, int arity)
     {
-        //if (arity > parents.size()) {
-            //throw new IllegalArgumentException("Jon: recombine() called with illegal arguments.");
-        //}        
+        if (arity > parents.size()) {
+            throw new IllegalArgumentException("Jon: recombine() called with illegal arguments.");
+        }        
         
         // parentGroups are like pairs of parents but generalized to m
         // members, where m = arity. parentGroups is a list of these.
@@ -178,8 +178,8 @@ public class player34 implements ContestSubmission
             if (r <= recombinationProbability) {
                 children.addAll(mMinusOnePointCrossover(pg, arity));
             }
-            // Just just add the unchanged parents to the kids 
-            else { children.addAll(pg); }
+            // Else just add the unchanged parents to the kids 
+            else  { children.addAll(pg); }
         }
                 
         // Copy a random subset of the kids (with replacement) if we ignored 
@@ -194,8 +194,9 @@ public class player34 implements ContestSubmission
         return children;
     }
     
-    // Helper function to recombine().
-    private List<Individual> mMinusOnePointCrossover(List<Individual> parentGroup, int arity) {
+    // Helper function to recombine(). Actually performs the (m-1) crossover for some
+    // input group of parents
+    private static List<Individual> mMinusOnePointCrossover(List<Individual> parentGroup, int arity) {
         List<Individual> children = new ArrayList<Individual>();
         Individual child;
         int childIndex, parentIndex, geneIndex;
@@ -203,22 +204,15 @@ public class player34 implements ContestSubmission
             child = new Individual();
             geneIndex = 0;
             parentIndex = childIndex;
-            for (int boundary : crossoverBoundaries) {
-                while (geneIndex < boundary) {
-                    try { child.genes[geneIndex] = parentGroup.get(parentIndex).genes[geneIndex]; }
-                    catch (IndexOutOfBoundsException e) {
-                    	System.out.println("debug:");
-                    	System.out.println(child);
-                    	System.out.println(parentGroup.get(parentIndex));
-                    	System.out.println(geneIndex);
-                    	
-                    	throw e;
-                    }
+            // Iterate towards each boundary and iteratively change the 'parentIndex'
+            // after each boundary so that alleles are selected from alternating parents
+            for (int boundary : crossoverBoundaries) {  // boundaries always include last index of genes
+                while (geneIndex <= boundary) {
+                    child.genes[geneIndex] = parentGroup.get(parentIndex).genes[geneIndex];
                     geneIndex++;
                 }
-                parentIndex = (parentIndex + 1) % arity;
+                parentIndex = (parentIndex + 1) % arity;  // (loop around)
             }
-            child = parentGroup.get(childIndex);
             children.add(child);
         }
         return children;
@@ -229,7 +223,7 @@ public class player34 implements ContestSubmission
         List<Integer> boundaries = new ArrayList<Integer>();
         // Initialize boundaries below. If the number of genes aren't evenly
         // divisible then that'll be fixed afterwards
-        for (int i = 1; i < arity; i++) {
+        for (int i = 1; i <= arity; i++) {
             boundaries.add((Individual.NUM_GENES / arity) * i - 1);
         }
         // Correct boundaries if there's genes left
@@ -261,8 +255,8 @@ public class player34 implements ContestSubmission
             // Select parents
         	List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true);
             // Apply crossover / mutation operators
-            //List<Individual> children = recombine(parents, 2);
-            List<Individual> children = reproduce(parents);
+            List<Individual> children = recombine(parents, 2);
+            //List<Individual> children = reproduce(parents);
             population.addAll(children);
             // Check fitness of unknown fuction
             population.evaluate(); // skips those who already have been evaluated
