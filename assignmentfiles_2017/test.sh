@@ -45,7 +45,7 @@ do
 	for (( i=1; i<=runCount; i++ ))
 	do
 		((seed++))
-		java -Dcsv -jar testrun.jar -submission=player34 -evaluation="${evalName}" -seed="${seed}" > "tests/${testName}/${evalName}/metrics_${seed}.csv"
+		java -Dpopsize=100 -Dcsv -jar testrun.jar -submission=player34 -evaluation="${evalName}" -seed="${seed}" > "tests/${testName}/${evalName}/metrics_${seed}.csv"
 	done
 	wait
 	# Run python script that loads csv files for each evaluation and plots metrics
