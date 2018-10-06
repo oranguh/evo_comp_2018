@@ -1,0 +1,21 @@
+WithoutFitnessSharing
+
+BentCigarFunction
+meanBestFitness: 9.999945176023248
+stdBestFitness: 8.238845127272088e-05
+meanConvergence: 784.0
+stdConvergence: 143.33178293735133
+
+
+SchaffersEvaluation
+meanBestFitness: 0.26079057644847603
+stdBestFitness: 0.4026070614939588
+meanConvergence: 8680.0
+stdConvergence: 14002.05699174232
+
+KatsuuraEvaluation
+meanBestFitness: 0.06074591973015325
+stdBestFitness: 0.14390672625107992
+meanConvergence: 10000.0
+stdConvergence: 0.0
+
