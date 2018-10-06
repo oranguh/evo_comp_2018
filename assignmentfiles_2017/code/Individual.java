@@ -36,9 +36,16 @@ public class Individual {
 
 	public void evaluate () {
 		// Only perform evaluation if fitness has not previously been determined
-		if (this.fitness == UNDETERMINED_FITNESS_VALUE) {
-			double x = (double) player34.evaluation_.evaluate(this.genes);
-			this.fitness = Math.max(0, x);
+		double x = 3.3;
+		try {
+			if (this.fitness == UNDETERMINED_FITNESS_VALUE) {
+				x = (double) (player34.evaluation_).evaluate(this.genes);
+				this.fitness = Math.max(0, x);
+			}
+		} catch (NullPointerException e) {
+			System.out.println(x);
+			System.out.println(player34.evaluation_);
+			throw e;
 		}
 	}
 
