@@ -22,6 +22,8 @@ public class player34 implements ContestSubmission
     public static final int PROBLEM_RANGE_MAX = 5;
 
     // configurable parameters
+    public static int islandAmount = 5;
+    public static int migrationInterval = 25;
     public static int populationSize_ = 10;
     public static int parentCountPerGeneration_ = 5;
     public static boolean sharedFitness = true;
@@ -134,51 +136,131 @@ public class player34 implements ContestSubmission
     }
     
 	public void run()
-	{  
-        // Initialize population
-        Population population = new Population(populationSize_);
-        population.evaluate(sharedFitness, sigmaShare);
-        population.print();
+	{
+	    if(islandAmount > 1){
+            // Initialize islands
 
-        // Print CSV header
-        Csv.printHeader("Evaluations", "Max fitness", "Diversity", "Mutation rate");
-        
-        // Add data point of initial population
-        Debug.printf("Evaluation count: %d / %d\n", populationSize_, evaluations_limit_);
-        Csv.printData(populationSize_, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
+//            List<Population> islandList = new ArrayList<Population>();
+            Population[] islandList = new Population[islandAmount];
 
-        int evaluationCount = populationSize_;
-        boolean hasRunOutOfEvaluations = false;
-        do {
-            // Select parents
-        	List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
-            // Apply crossover / mutation operators
-            List<Individual> children = reproduce(parents);
-            population.addAll(children);
-            // Check fitness of unknown fuction
-            population.evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
-            evaluationCount += parentCountPerGeneration_; // same as number of children atm
-            // Select survivors
-            population.individuals = population.tournamentSelection(populationSize_, 5, true, sharedFitness);
-
-            // Debug print 10 times
-	        if (evaluationCount % (evaluations_limit_/10) == 0) {
-	        	Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
-	        	population.print();
-            }
-            
-            // Print to file 100 times
-            if (evaluationCount % (evaluations_limit_/100) == 0) {
-                Csv.printData(evaluationCount, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
+            // Initialize population(s)
+            for (int i=0; i<islandAmount; i++){
+                islandList[i] = new Population(populationSize_);
+                islandList[i].evaluate(sharedFitness, sigmaShare);
+                islandList[i].print();
             }
 
-            hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
-        } while (!hasRunOutOfEvaluations);
+            // Print CSV header
+            Csv.printHeader("Evaluations", "Max fitness", "Diversity", "Mutation rate");
 
-        // When printing to csv is enabled, prevent the end of 
-        // the program from adding garbage to it by printing stuff (results etc)
-        if (Csv.isOutputEnabled) {
-            disableConsolePrinting();
+            // Add data point of initial population
+            Debug.printf("Evaluation count: %d / %d\n", populationSize_, evaluations_limit_);
+            Csv.printData(populationSize_, islandList[0].getMaxFitness(), islandList[0].getAverageDistanceFromMean(), islandList[0].individuals.get(0).mutationRate);
+
+            int evaluationCount = populationSize_*islandAmount;
+            boolean hasRunOutOfEvaluations = false;
+
+            do {
+//              do for each island
+                for (int i=0; i<islandAmount; i++) {
+                    // Select parents
+                    List<Individual> parents = islandList[i].tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
+                    // Apply crossover / mutation operators
+                    List<Individual> children = reproduce(parents);
+                    islandList[i].addAll(children);
+                    // Check fitness of unknown fuction
+                    islandList[i].evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
+                    evaluationCount += parentCountPerGeneration_; // same as number of children atm
+                    // Select survivors
+                    islandList[i].individuals = islandList[0].tournamentSelection(populationSize_, 5, true, sharedFitness);
+
+                    // Debug print 10 times
+                    if (evaluationCount % (evaluations_limit_ / 10) == 0) {
+                        Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
+                        islandList[0].print();
+                    }
+
+                    // Print to file 100 times
+                    if (evaluationCount % (evaluations_limit_ / 100) == 0) {
+                        Csv.printData(evaluationCount, islandList[0].getMaxFitness(), islandList[0].getAverageDistanceFromMean(), islandList[0].individuals.get(0).mutationRate);
+                    }
+
+                    //migration
+                    if (evaluationCount % (migrationInterval*islandAmount*populationSize_) == 0){
+                        //do migration
+
+                        // Get the best individuals from each island and put in list
+                        List<Individual> bestIndividuals= new ArrayList<Individual>();
+                        for (int j=0; j<islandAmount; j++) {
+                            bestIndividuals.add(islandList[j].returnBest());
+
+                        }
+                        // forcefully re-allocate them to the next island.
+                        for (int j=0; j<islandAmount; j++) {
+                            islandList[j].individuals.remove(0);
+                            islandList[j].individuals.add(bestIndividuals.get((j+1) % islandAmount));
+                        }
+
+//                        System.out.println(bestIndividuals);
+                    }
+
+                }
+                hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
+            } while (!hasRunOutOfEvaluations);
+
+            // When printing to csv is enabled, prevent the end of
+            // the program from adding garbage to it by printing stuff (results etc)
+            if (Csv.isOutputEnabled) {
+                disableConsolePrinting();
+            }
+
+
+        }else {
+            // Initialize population
+            Population population = new Population(populationSize_);
+            population.evaluate(sharedFitness, sigmaShare);
+            population.print();
+
+            // Print CSV header
+            Csv.printHeader("Evaluations", "Max fitness", "Diversity", "Mutation rate");
+
+            // Add data point of initial population
+            Debug.printf("Evaluation count: %d / %d\n", populationSize_, evaluations_limit_);
+            Csv.printData(populationSize_, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
+
+            int evaluationCount = populationSize_;
+            boolean hasRunOutOfEvaluations = false;
+            do {
+                // Select parents
+                List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
+                // Apply crossover / mutation operators
+                List<Individual> children = reproduce(parents);
+                population.addAll(children);
+                // Check fitness of unknown fuction
+                population.evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
+                evaluationCount += parentCountPerGeneration_; // same as number of children atm
+                // Select survivors
+                population.individuals = population.tournamentSelection(populationSize_, 5, true, sharedFitness);
+
+                // Debug print 10 times
+                if (evaluationCount % (evaluations_limit_ / 10) == 0) {
+                    Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
+                    population.print();
+                }
+
+                // Print to file 100 times
+                if (evaluationCount % (evaluations_limit_ / 100) == 0) {
+                    Csv.printData(evaluationCount, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
+                }
+
+                hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
+            } while (!hasRunOutOfEvaluations);
+
+            // When printing to csv is enabled, prevent the end of
+            // the program from adding garbage to it by printing stuff (results etc)
+            if (Csv.isOutputEnabled) {
+                disableConsolePrinting();
+            }
         }
 	}
 }

@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.DoubleStream;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class Population {
 	public List<Individual> individuals;
@@ -167,6 +169,36 @@ public class Population {
     		averageDistanceFromMean += euclideanDistance/n;
     	}
     	return averageDistanceFromMean;
+    }
+    public Individual returnBest () {
+
+//        Individual[] sortedPop = Arrays.copyOf(this.individuals, this.individuals.size());
+//        Individual[] sortedPop = this.individuals.clone();
+//        List<Individual> sortedPop = Arrays.copyOf(this.individuals, this.individuals.size());
+//        List<Individual> sortedPop = this.individuals.clone();
+
+//        Individual[] sortedPop = new Individual[this.individuals.size()];
+        List<Individual> sortedPop = new ArrayList<Individual>();
+
+        for (Individual individual : this.individuals) {
+            sortedPop.add(individual);
+        }
+
+
+        Collections.sort(sortedPop, new Comparator<Individual>() {
+            public int compare(Individual i1, Individual i2) {
+
+                if(i1.fitness > i2.fitness) {
+                    return 1;
+                }
+                else if(i1.fitness < i2.fitness) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+
+        return sortedPop.get(0);
     }
 
 }
