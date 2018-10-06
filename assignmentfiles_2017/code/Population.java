@@ -198,7 +198,7 @@ public class Population {
             }
         });
 
-        return sortedPop.get(0);
+        return sortedPop.get(sortedPop.size()-1);
     }
 
 }
