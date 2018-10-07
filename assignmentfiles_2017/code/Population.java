@@ -170,35 +170,28 @@ public class Population {
     	}
     	return averageDistanceFromMean;
     }
-    public Individual returnBest () {
+    public List<Individual> returnBestn (int amount) {
 
-//        Individual[] sortedPop = Arrays.copyOf(this.individuals, this.individuals.size());
-//        Individual[] sortedPop = this.individuals.clone();
-//        List<Individual> sortedPop = Arrays.copyOf(this.individuals, this.individuals.size());
-//        List<Individual> sortedPop = this.individuals.clone();
-
-//        Individual[] sortedPop = new Individual[this.individuals.size()];
         List<Individual> sortedPop = new ArrayList<Individual>();
 
         for (Individual individual : this.individuals) {
             sortedPop.add(individual);
         }
 
-
+//        Sort descending, largest fitness first
         Collections.sort(sortedPop, new Comparator<Individual>() {
             public int compare(Individual i1, Individual i2) {
 
                 if(i1.fitness > i2.fitness) {
-                    return 1;
+                    return -1;
                 }
                 else if(i1.fitness < i2.fitness) {
-                    return -1;
+                    return 1;
                 }
                 return 0;
             }
         });
-
-        return sortedPop.get(sortedPop.size()-1);
+        return sortedPop.subList(0, amount);
     }
 
 }

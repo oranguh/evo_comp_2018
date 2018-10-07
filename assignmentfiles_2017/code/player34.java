@@ -23,7 +23,8 @@ public class player34 implements ContestSubmission
 
     // configurable parameters
     public static int islandAmount = 5;
-    public static int migrationInterval = 25;
+    public static int epoch = 25;
+    public static int migrationSize = 1;
     public static int populationSize_ = 10;
     public static int parentCountPerGeneration_ = 5;
     public static boolean sharedFitness = true;
@@ -186,22 +187,25 @@ public class player34 implements ContestSubmission
                     }
 
                     //migration
-                    if (evaluationCount % (migrationInterval*islandAmount*populationSize_) == 0){
+                    if (evaluationCount % (epoch*islandAmount*populationSize_) == 0){
                         //do migration
 
                         // Get the best individuals from each island and put in list
-                        List<Individual> bestIndividuals= new ArrayList<Individual>();
+                        List<List<Individual>> listBestIndividuals= new ArrayList<List<Individual>>();
                         for (int j=0; j<islandAmount; j++) {
-                            bestIndividuals.add(islandList[j].returnBest());
+                            listBestIndividuals.add(islandList[j].returnBestn(migrationSize));
 
                         }
                         // forcefully re-allocate them to the next island.
                         for (int j=0; j<islandAmount; j++) {
-                            islandList[j].individuals.remove(0);
-                            islandList[j].individuals.add(bestIndividuals.get((j+1) % islandAmount));
+                            for (int k=0; k<listBestIndividuals.get(j).size();k++){
+                                islandList[j].individuals.remove(k);
+                                islandList[j].individuals.add(listBestIndividuals.get((j+1) % islandAmount).get(k));
+                            }
                         }
 
 //                        System.out.println(bestIndividuals);
+
                     }
 
                 }
