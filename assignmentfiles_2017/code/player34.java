@@ -286,11 +286,10 @@ public class player34 implements ContestSubmission
             for (int i=0; i<islandAmount_; i++) {
                 // Select parents
                 List<Individual> parents = islandList[i].tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
+                List<Individual> children = recombine(parents, 2);
                 // Apply crossover / mutation operators
-                //mutate(parents);
-                //List<Individual> children = recombine(parents, 2);
-                List<Individual> children = parents;
-                population.addAll(children);
+                mutate(children);
+                islandList[i].addAll(children);
                 // Check fitness of unknown fuction
                 islandList[i].evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
                 evaluationCount += parentCountPerGeneration_; // same as number of children atm
