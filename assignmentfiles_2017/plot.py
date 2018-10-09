@@ -98,3 +98,7 @@ fig.tight_layout()
 
 # Save to file
 plt.savefig(args.dst, bbox_inches='tight', dpi=150)
+
+# Print results
+print("MBF: %.3E (+- %.3E)" % (meanBestFitness, stdBestFitness))
+print("CVG: %.3E (+- %.3E)" % (meanConvergence, stdConvergence))
