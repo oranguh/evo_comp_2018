@@ -25,7 +25,7 @@ public class player34 implements ContestSubmission
     public static int islandAmount_ = 5;
     public static int epoch_ = 25;
     public static int migrationSize_ = 1;
-    public static int populationSize_ = 10;
+    public static int populationSize_ = 100;
     public static int parentCountPerGeneration_ = 5;
     public static boolean sharedFitness = true;
     public static double sigmaShare = 0.001;
@@ -75,6 +75,10 @@ public class player34 implements ContestSubmission
         // set how many islands we use
         if (System.getProperty("islands") != null) {
             islandAmount_ = Integer.parseInt(System.getProperty("islands"));
+            if (populationSize_ % islandAmount_ != 0) {
+                System.err.println("Population size is not divisible by number of islands.");
+                System.exit(-1);
+            }
         }
 
         // set how many iterations go into an epoch (basically migration interval)
@@ -136,8 +140,9 @@ public class player34 implements ContestSubmission
     		// Reset fitness so that it'll be evaluated later
             individual.resetFitness();
             // First, re-sample mutation rate (sigma)
-            //double tau = Math.sqrt(PROBLEM_DIMENSIONALITY);
-            //individual.mutationRate *= Math.exp(tau * rnd_.nextGaussian());
+            double tau = Math.sqrt(PROBLEM_DIMENSIONALITY);
+            individual.mutationRate *= Math.exp(tau * rnd_.nextGaussian());
+            individual.mutationRate = Math.min(individual.mutationRate, 3.0);
             // Then, sample gaussian and apply to each gene
 			for (int i = 0; i < individual.genes.length; i++) {
 				double mutation = 0.0;
@@ -253,6 +258,9 @@ public class player34 implements ContestSubmission
     
 	public void run()
 	{
+        // Spread population of islands
+        int populationPerIsland = populationSize_ / islandAmount_;
+
         // Initialize islands
         Population[] islandList = new Population[islandAmount_];
 
