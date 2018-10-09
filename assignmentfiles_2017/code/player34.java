@@ -29,12 +29,17 @@ public class player34 implements ContestSubmission
     public static int parentCountPerGeneration_ = 5;
     public static boolean sharedFitness = true;
     public static double sigmaShare = 0.001;
+    public static double recombinationProbability = 1.0;  // Added by Jon
+    public static int recombinationArity = 2;             // Added by Jon
 
     // provided fields (do not touch)
 	public static Random rnd_;
 	public static ContestEvaluation evaluation_;
     private int evaluations_limit_;
-	
+    
+    // Added by Jon
+    public static List<Integer> crossoverBoundaries;    
+    
 	public player34()
 	{
 		rnd_ = new Random();
@@ -66,6 +71,10 @@ public class player34 implements ContestSubmission
         if (System.getProperty("parentcount") != null) {
             parentCountPerGeneration_ = Integer.parseInt(System.getProperty("parentcount"));
         }
+        
+        // Added by Jon. Compute (m-1) points used for crossover once, but allow for recomputing
+        // them later in case we want to modify it on-the-fly
+        setCrossoverBoundaries(recombinationArity);
 	}
 
     private static void disableConsolePrinting () {
@@ -105,36 +114,127 @@ public class player34 implements ContestSubmission
         }
     }
 
-    private List<Individual> reproduce (List<Individual> parents)
+    private void mutate(List<Individual> individuals)
     {
-    	List<Individual> children = new ArrayList<Individual>();
         // Each parent generates one child by just mutation (gaussian noise)
-    	for (Individual parent : parents) {
-            // Copy parent
-    		Individual child = new Individual(parent);
-            // Reset fitness causing the child fitness to be evaluated later
-            child.resetFitness();
+    	for (Individual individual : individuals) {
+    		// Reset fitness so that it'll be evaluated later
+            individual.resetFitness();
             // First, re-sample mutation rate (sigma)
-            double tau = Math.sqrt(PROBLEM_DIMENSIONALITY);
-            child.mutationRate = parent.mutationRate * Math.exp(tau * rnd_.nextGaussian());
-            child.mutationRate = Math.min(child.mutationRate, 3.0);
+            //double tau = Math.sqrt(PROBLEM_DIMENSIONALITY);
+            //individual.mutationRate *= Math.exp(tau * rnd_.nextGaussian());
             // Then, sample gaussian and apply to each gene
-			for (int i=0; i<child.genes.length; i++) {
+			for (int i = 0; i < individual.genes.length; i++) {
 				double mutation = 0.0;
                 boolean willGoOutOfBounds = true;
                 // Keep re-sampling gaussian until mutation stays within problem domain
 				do {
-                    mutation = rnd_.nextGaussian() * child.mutationRate;
-                    double x = child.genes[i] + mutation;
+                    mutation = rnd_.nextGaussian() * individual.mutationRate;
+                    double x = individual.genes[i] + mutation;
                     willGoOutOfBounds = x <= PROBLEM_RANGE_MIN || x >= PROBLEM_RANGE_MAX;
                 } while (willGoOutOfBounds);
                 // Apply mutation
-				child.genes[i] += mutation;
+				individual.genes[i] += mutation;
 			}
-			children.add(child);
     	}
-    	return children;
     }
+    
+    // (m-1) point recombination for m parents where m is the arity. This function also
+    // subdivides the input group 'parents' of any size into subsets of size m
+    public static List<Individual> recombine(List<Individual> parents, int arity)
+    {
+        if (arity > parents.size() || arity < 2) {
+            throw new IllegalArgumentException("Jon: recombine() called with illegal arguments.");
+        }        
+        
+        // Initialize empty list of kids
+        List<Individual> children = new ArrayList<Individual>();        
+        
+        // parentGroups are like pairs of parents but generalized to m
+        // members, where m = arity. parentGroups is a list of these.
+        List<Individual> parentGroup  = new ArrayList<Individual>();
+        List<List<Individual>> parentGroups = new ArrayList<List<Individual>>();
+         
+        // Get number of parents in total recombination pool. If there's an 
+        // 'unpairable' set of size < m then return these without changing 'em
+        int parentCount = parents.size();
+        int nIgnored = parentCount % arity;
+        parentCount = parentCount - nIgnored;
+        for (int i = parentCount; i < parents.size(); i++) {
+        	children.add(parents.get(i));
+        }
+        
+        // Add parents to reproductive groups of size m (FOR SEX)
+        int counter = 0;
+        for (int i = 0; i < parentCount; i++) {
+            parentGroup.add(parents.get(i));
+            counter++;
+            if (counter == arity) {
+                parentGroups.add(parentGroup);
+                counter = 0;
+                parentGroup  = new ArrayList<Individual>();
+            }
+        }
+ 
+        // Perform (m-1) point crossover
+        double r;  // random probability
+        for (List<Individual> pg : parentGroups) {
+            // Do the crossover with recombination probability defined at top
+            r = rnd_.nextDouble();
+            if (r < recombinationProbability) {
+                children.addAll(mMinusOnePointCrossover(pg, arity));
+            }
+            // Else just add the unchanged parents to the kids 
+            else  { children.addAll(pg); }
+        }
+        
+        // Reset fitness of children for evaluation later
+        for (Individual child : children)  { child.resetFitness(); }
+        
+        // Return list of kids with kids.size == parents.size
+        return children;
+    }
+    
+    // Helper function to recombine(). Actually performs the (m-1) crossover for some
+    // input group of parents
+    private static List<Individual> mMinusOnePointCrossover(List<Individual> parentGroup, int arity) {
+        List<Individual> children = new ArrayList<Individual>();
+        Individual child;
+        int childIndex, parentIndex, geneIndex;
+        for (childIndex = 0; childIndex < arity; childIndex++) {
+            child = new Individual();
+            geneIndex = 0;
+            parentIndex = childIndex;
+            // Iterate towards each boundary and iteratively change the 'parentIndex'
+            // after each boundary so that alleles are selected from alternating parents
+            for (int boundary : crossoverBoundaries) {  // boundaries always include last index of genes
+                while (geneIndex <= boundary) {
+                    child.genes[geneIndex] = parentGroup.get(parentIndex).genes[geneIndex];
+                    geneIndex++;
+                }
+                parentIndex = (parentIndex + 1) % arity;  // (loop around)
+            }
+            children.add(child);
+        }
+        return children;
+    }
+
+    // This is a a setter for the public static crossoverBoundaries list
+    private static void setCrossoverBoundaries(int arity) {
+        List<Integer> boundaries = new ArrayList<Integer>();
+        // Initialize boundaries below. If the number of genes aren't evenly
+        // divisible then that'll be fixed afterwards
+        for (int i = 1; i <= arity; i++) {
+            boundaries.add((Individual.NUM_GENES / arity) * i - 1);
+        }
+        // Correct boundaries if there's genes left
+        int remainder = Individual.NUM_GENES % arity;
+        for (int i = 0; i < boundaries.size(); i++) {
+            if (i < remainder)  { boundaries.set(i, boundaries.get(i) + i + 1); }
+            else  { boundaries.set(i,  boundaries.get(i) + remainder); }
+        }
+        crossoverBoundaries = boundaries;
+    }    
     
 	public void run()
 	{
@@ -167,7 +267,8 @@ public class player34 implements ContestSubmission
                     // Select parents
                     List<Individual> parents = islandList[i].tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
                     // Apply crossover / mutation operators
-                    List<Individual> children = reproduce(parents);
+                    mutate(parents);
+                    List<Individual> children = recombine(parents, 2);
                     islandList[i].addAll(children);
                     // Check fitness of unknown fuction
                     islandList[i].evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
@@ -217,7 +318,14 @@ public class player34 implements ContestSubmission
             if (Csv.isOutputEnabled) {
                 disableConsolePrinting();
             }
+            
+            // Print to file 100 times
+            if (evaluationCount % (evaluations_limit_/100) == 0) {
+                Csv.printData(evaluationCount, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
+            }
 
+            hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
+        } while (!hasRunOutOfEvaluations);
 
         }else {
             // Initialize population
@@ -238,7 +346,8 @@ public class player34 implements ContestSubmission
                 // Select parents
                 List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
                 // Apply crossover / mutation operators
-                List<Individual> children = reproduce(parents);
+                mutate(parents);
+                List<Individual> children = recombine(parents, 2);
                 population.addAll(children);
                 // Check fitness of unknown fuction
                 population.evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
