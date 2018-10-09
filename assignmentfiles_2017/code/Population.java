@@ -95,7 +95,7 @@ public class Population {
     }
 
     public List<Individual> tournamentSelection (int drawCount, int k, boolean withReplacement, boolean sharedFitness) {
-        List<Individual> populationCopy;
+        List<Individual> populationCopy = new ArrayList<Individual>(this.individuals);
         List<Individual> competitionPool = new ArrayList<Individual>();
         List<Individual> chosenOnes = new ArrayList<Individual>();
         Individual randomIndividual, winner;
