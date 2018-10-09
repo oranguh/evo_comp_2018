@@ -2,7 +2,7 @@ import java.util.Arrays;
 import java.util.StringJoiner;
 
 public class Csv {
-	public static boolean isOutputEnabled = true;
+	public static boolean isOutputEnabled = false;
 
 	public static void printHeader (String... headers) {
 		if (isOutputEnabled) {
