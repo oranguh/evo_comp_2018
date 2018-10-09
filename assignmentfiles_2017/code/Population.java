@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.DoubleStream;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class Population {
 	public List<Individual> individuals;
@@ -17,18 +19,45 @@ public class Population {
 		this.individuals.addAll(newcomers);
 	}
 
-    public void print ()
-    {
+    public void print (){
     	Debug.println("Population:");
     	for (Individual individual : this.individuals) {
     		Debug.println(individual);
     	}
     }
 
-    public void evaluate () {
+    public void evaluate (boolean shareFitness, double sigmaShare) {
     	for (Individual individual : this.individuals) {
     		individual.evaluate();
-    	}
+        }
+        if (shareFitness == true) {
+            fitnessSharing(sigmaShare);
+        }
+    }
+    
+    private void fitnessSharing(double sigmaShare){
+        for (Individual individual_i : this.individuals){
+            double sharedSum = 0.0;
+            for (Individual individual_j : this.individuals){
+                double distance = calculateEuclideanDistance(individual_i.genes, individual_j.genes);
+                sharedSum += sharedD(distance, sigmaShare);
+            }
+            individual_i.fitnessShared = individual_i.fitness / sharedSum;
+        }
+    }
+
+    private double calculateEuclideanDistance(double[] individual_i, double[] individual_j){
+        double Sum = 0.0;
+        for(int i=0;i<individual_i.length;i++) {
+           Sum = Sum + Math.pow((individual_i[i]-individual_j[i]),2.0);
+        }
+        return Math.sqrt(Sum);
+    }
+
+    private double sharedD(double distance, double sigmaShare){
+        double output = 0.0;
+        if (distance <= sigmaShare) output = 1 - (distance / sigmaShare);
+        return output;
     }
 
     public List<Individual> fitnessProportionalSelection (int drawCount) {
@@ -58,15 +87,15 @@ public class Population {
     }
     
     public List<Individual> tournamentSelectionWithReplacement (int drawCount, int k) {
-        return tournamentSelection(drawCount, k, true);
+        return tournamentSelection(drawCount, k, true, true);
     }
 
     public List<Individual> tournamentSelectionWithoutReplacement (int drawCount, int k) {
-        return tournamentSelection(drawCount, k, false);
+        return tournamentSelection(drawCount, k, false, true);
     }
 
-    public List<Individual> tournamentSelection (int drawCount, int k, boolean withReplacement) {
-        List<Individual> populationCopy = new ArrayList<Individual>(this.individuals);
+    public List<Individual> tournamentSelection (int drawCount, int k, boolean withReplacement, boolean sharedFitness) {
+        List<Individual> populationCopy;
         List<Individual> competitionPool = new ArrayList<Individual>();
         List<Individual> chosenOnes = new ArrayList<Individual>();
         Individual randomIndividual, winner;
@@ -97,7 +126,11 @@ public class Population {
             // Compare these k individuals and select the best of them;
             winner = competitionPool.get(0);
             for (Individual individual : competitionPool) {
-                if (individual.fitness > winner.fitness)  winner = individual;
+                if (sharedFitness == true) {
+                    if (individual.fitnessShared> winner.fitnessShared)  winner = individual;
+                } else{
+                    if (individual.fitness> winner.fitness)  winner = individual;
+                }
             }
             chosenOnes.add(winner);
         }
@@ -141,4 +174,28 @@ public class Population {
     	}
     	return averageDistanceFromMean;
     }
+    public List<Individual> returnBestn (int amount) {
+
+        List<Individual> sortedPop = new ArrayList<Individual>();
+
+        for (Individual individual : this.individuals) {
+            sortedPop.add(individual);
+        }
+
+//        Sort descending, largest fitness first
+        Collections.sort(sortedPop, new Comparator<Individual>() {
+            public int compare(Individual i1, Individual i2) {
+
+                if(i1.fitness > i2.fitness) {
+                    return -1;
+                }
+                else if(i1.fitness < i2.fitness) {
+                    return 1;
+                }
+                return 0;
+            }
+        });
+        return sortedPop.subList(0, amount);
+    }
+
 }

@@ -41,10 +41,11 @@ for evalName in "${evalNames[@]}"
 do
 	mkdir -p "tests/${testName}/${evalName}"
 	echo "running ${evalName}"
+	seed=$RANDOM
 	for (( i=1; i<=runCount; i++ ))
 	do
-		seed=$RANDOM
-		java -Dcsv -jar testrun.jar -submission=player34 -evaluation="${evalName}" -seed="${seed}" > "tests/${testName}/${evalName}/metrics_${seed}.csv"
+		((seed++))
+		java -Dpopsize=100 -Dcsv -jar testrun.jar -submission=player34 -evaluation="${evalName}" -seed="${seed}" > "tests/${testName}/${evalName}/metrics_${seed}.csv"
 	done
 	wait
 	# Run python script that loads csv files for each evaluation and plots metrics
