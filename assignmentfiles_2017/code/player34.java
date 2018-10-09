@@ -274,7 +274,7 @@ public class player34 implements ContestSubmission
                     islandList[i].evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
                     evaluationCount += parentCountPerGeneration_; // same as number of children atm
                     // Select survivors
-                    islandList[i].individuals = islandList[0].tournamentSelection(populationSize_, 5, true, sharedFitness);
+                    islandList[i].individuals = islandList[i].tournamentSelection(populationSize_, 5, true, sharedFitness);
 
                     // Debug print 10 times
                     if (evaluationCount % (evaluations_limit_ / 10) == 0) {
@@ -339,8 +339,9 @@ public class player34 implements ContestSubmission
                 // Select parents
                 List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
                 // Apply crossover / mutation operators
-                mutate(parents);
-                List<Individual> children = recombine(parents, 2);
+                //mutate(parents);
+                //List<Individual> children = recombine(parents, 2);
+                List<Individual> children = parents;
                 population.addAll(children);
                 // Check fitness of unknown fuction
                 population.evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
