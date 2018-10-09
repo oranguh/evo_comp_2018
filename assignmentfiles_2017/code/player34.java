@@ -319,15 +319,8 @@ public class player34 implements ContestSubmission
                 disableConsolePrinting();
             }
             
-            // Print to file 100 times
-            if (evaluationCount % (evaluations_limit_/100) == 0) {
-                Csv.printData(evaluationCount, population.getMaxFitness(), population.getAverageDistanceFromMean(), population.individuals.get(0).mutationRate);
-            }
 
-            hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
-        } while (!hasRunOutOfEvaluations);
-
-        }else {
+        } else {
             // Initialize population
             Population population = new Population(populationSize_);
             population.evaluate(sharedFitness, sigmaShare);
