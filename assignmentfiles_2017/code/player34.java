@@ -266,7 +266,7 @@ public class player34 implements ContestSubmission
 
         // Initialize population(s)
         for (int i=0; i<islandAmount_; i++){
-            islandList[i] = new Population(populationSize_);
+            islandList[i] = new Population(populationPerIsland);
             islandList[i].evaluate(sharedFitness, sigmaShare);
             islandList[i].print();
         }
@@ -276,17 +276,17 @@ public class player34 implements ContestSubmission
 
         // Add data point of initial population
         // Consider the individuals on different islands as one giant population for stats
+        Debug.printf("Evaluation count: %d / %d\n", populationSize_, evaluations_limit_);
         Population continent = new Population(0);
         for (Population pop : islandList) {
             continent.individuals.addAll(pop.individuals);
         }
-        Debug.printf("Evaluation count: %d / %d\n", populationSize_, evaluations_limit_);
         Csv.printData(populationSize_, 
             continent.getMaxFitness(), 
             continent.getAverageDistanceFromMean(), 
             continent.returnBestn(1).get(0).mutationRate);
 
-        int evaluationCount = populationSize_*islandAmount_;
+        int evaluationCount = populationSize_;
         boolean hasRunOutOfEvaluations = false;
 
         do {
@@ -302,7 +302,7 @@ public class player34 implements ContestSubmission
                 islandList[i].evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
                 evaluationCount += parentCountPerGeneration_; // same as number of children atm
                 // Select survivors
-                islandList[i].individuals = islandList[i].tournamentSelection(populationSize_, 5, true, sharedFitness);
+                islandList[i].individuals = islandList[i].tournamentSelection(populationPerIsland, 5, true, sharedFitness);
 
                 // Debug print 10 times
                 if (evaluationCount % (evaluations_limit_ / 10) == 0) {
@@ -323,7 +323,7 @@ public class player34 implements ContestSubmission
                         continent.returnBestn(1).get(0).mutationRate);
                 }
 
-                boolean isTimeForMigration = evaluationCount % (epoch_*islandAmount_*populationSize_) == 0;
+                boolean isTimeForMigration = evaluationCount % (epoch_*populationSize_) == 0;
                 if (isTimeForMigration) {
                     // Get the best individuals from each island and put in list
                     List<List<Individual>> listBestIndividuals= new ArrayList<List<Individual>>();
