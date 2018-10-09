@@ -323,7 +323,7 @@ public class player34 implements ContestSubmission
                         continent.returnBestn(1).get(0).mutationRate);
                 }
 
-                boolean isTimeForMigration = evaluationCount % (epoch_*populationSize_) == 0;
+                boolean isTimeForMigration = islandAmount_ > 1 && evaluationCount % (epoch_*populationSize_) == 0;
                 if (isTimeForMigration) {
                     // Get the best individuals from each island and put in list
                     List<List<Individual>> listBestIndividuals= new ArrayList<List<Individual>>();
