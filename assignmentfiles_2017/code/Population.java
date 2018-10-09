@@ -95,7 +95,7 @@ public class Population {
     }
 
     public List<Individual> tournamentSelection (int drawCount, int k, boolean withReplacement, boolean sharedFitness) {
-        List<Individual> populationCopy;
+        List<Individual> populationCopy = new ArrayList<Individual>(this.individuals);
         List<Individual> competitionPool = new ArrayList<Individual>();
         List<Individual> chosenOnes = new ArrayList<Individual>();
         Individual randomIndividual, winner;
@@ -104,9 +104,14 @@ public class Population {
         //if (drawCount > individuals.size() || k > individuals.size()) {
         	//throw new IllegalArgumentException("drawCount and k should not exceed population size.");
         //}
-        
+
         for (int i = 0; i < drawCount; i++) {
-            populationCopy = new ArrayList<Individual>(this.individuals);
+        	// If not with replacement, individuals are removed from the population
+        	// so population should be reset before every tournament iteration
+        	if (!withReplacement) {
+        		populationCopy.clear();
+        		populationCopy.addAll(this.individuals);
+        	}
             competitionPool.clear();
             
             // Choose k random individuals and add to competition pool,
@@ -129,7 +134,6 @@ public class Population {
             }
             chosenOnes.add(winner);
         }
-
         return chosenOnes;       
     }    
 
