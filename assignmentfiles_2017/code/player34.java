@@ -231,7 +231,9 @@ public class player34 implements ContestSubmission
                     }
                 }
             }
-            hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ > evaluations_limit_;
+
+            // Predict if we run out of evaluations before the end of the next iteration
+            hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ * islandAmount_ > evaluations_limit_;
         } while (!hasRunOutOfEvaluations);
 
         // When printing to csv is enabled, prevent the end of
