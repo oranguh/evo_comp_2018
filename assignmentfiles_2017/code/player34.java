@@ -345,7 +345,8 @@ public class player34 implements ContestSubmission
                 // Select parents
                 List<Individual> parents = population.tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
                 // Apply crossover / mutation operators
-                List<Individual> children = reproduce(parents);
+                mutate(parents);
+                List<Individual> children = recombine(parents, 2);
                 population.addAll(children);
                 // Check fitness of unknown fuction
                 population.evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
