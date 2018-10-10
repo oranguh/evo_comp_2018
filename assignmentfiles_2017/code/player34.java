@@ -101,7 +101,7 @@ public class player34 implements ContestSubmission
             sharedFitness = false;
         }
 
-        if (parentCountPerGeneration_ % recombinationArity != 0) {
+        if (parentCountPerGeneration_ % recombinationArity_ != 0) {
             System.err.println("Parents per generation is not divisible by recombination arity.");
             System.exit(-1);
         }
