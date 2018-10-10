@@ -22,14 +22,15 @@ public class player34 implements ContestSubmission
     public static final int PROBLEM_RANGE_MAX = 5;
 
     // configurable parameters
-    public static int islandAmount_ = 5;
+    public static int islandAmount_ = 1;
     public static int epoch_ = 50;
-    public static int migrationSize_ = 1;
-    public static int populationSize_ = 200;
+    public static int migrationSize_ = 2;
+    public static int populationSize_ = 100;
     public static int parentCountPerGeneration_ = 6;
-    public static boolean sharedFitness = true;
-    public static double sigmaShare = 0.001;
-    public static double recombinationProbability = 1.0;  // Added by Jon
+    public static boolean sharedFitness_ = false;
+    public static double sigmaShare_ = 0.001;
+    public static boolean enableRecombination_ = false;
+    public static double recombinationProbability_ = 1.0;  // Added by Jon
     public static int recombinationArity_ = 2;             // Added by Jon
 
     // provided fields (do not touch)
@@ -44,72 +45,89 @@ public class player34 implements ContestSubmission
 	{
 		rnd_ = new Random();
 
+        // Administrative parameters
         // Disable console output for competition environment
         // Start with "java -Ddebug -jar ..." to enable
         if (System.getProperty("debug") != null) {
             Debug.isOutputEnabled = true;
         }
-
         // Use to write to file through redirected console output
         // Start with "java -Dcsv -jar ... > filename.csv" to enable
         if (System.getProperty("csv") != null) {
             Csv.isOutputEnabled = true;
         }
 
-        // Since file writing uses redirected console output, Debug and Csv conflict
-        if (Debug.isOutputEnabled && Csv.isOutputEnabled) {
-            System.err.println("Cannot use -Ddebug and -Dcsv at the same time.");
-            System.exit(-1);
-        }
 
+        // General model parameters
         // set population size
         if (System.getProperty("popsize") != null) {
             populationSize_ = Integer.parseInt(System.getProperty("popsize"));
         }
-
-        // set how many parents are selected each generation
+        // set how many parents are selected each generation (also number of children)
         if (System.getProperty("parentcount") != null) {
             parentCountPerGeneration_ = Integer.parseInt(System.getProperty("parentcount"));
         }
 
+
+        // Island model parameters
         // set how many islands we use
         if (System.getProperty("islands") != null) {
             islandAmount_ = Integer.parseInt(System.getProperty("islands"));
-            if (populationSize_ % islandAmount_ != 0) {
-                System.err.println("Population size is not divisible by number of islands.");
-                System.exit(-1);
-            }
         }
-
         // set how many iterations go into an epoch (basically migration interval)
         if (System.getProperty("epoch") != null) {
             epoch_ = Integer.parseInt(System.getProperty("epoch"));
         }
-
         // set how many iterations go into an epoch (basically migration interval)
         if (System.getProperty("migrationsize") != null) {
             migrationSize_ = Integer.parseInt(System.getProperty("migrationsize"));
         }
 
+
+        // Fitness sharing parameters
         // set how many iterations go into an epoch (basically migration interval)
-        if (System.getProperty("recombarity") != null) {
+        if (System.getProperty("sharefitness") != null) {
+            sharedFitness_ = true;
+        }
+        // set how large a neighbourhood is (sharing threshold)
+        if (System.getProperty("sigma") != null) {
+            sigmaShare_ = Double.parseDouble(System.getProperty("sigma"));
+        }
+
+
+        // Recombination parameters
+        // Enable/disable recombination
+        if (System.getProperty("recombination") != null) {
+            enableRecombination_ = true;
+        }
+        // set how many iterations go into an epoch (basically migration interval)
+        if (System.getProperty("arity") != null) {
             recombinationArity_ = Integer.parseInt(System.getProperty("recombarity"));
         }
+        // Compute (m-1) points used for crossover once, but allow for recomputing
+        // them later in case we want to modify it on-the-fly
+        setCrossoverBoundaries(recombinationArity_);
 
-        // set how many iterations go into an epoch (basically migration interval)
-        if (System.getProperty("nofitnesssharing") != null) {
-            sharedFitness = false;
+
+        // Perform some checks
+        // Since file writing uses redirected console output, Debug and Csv conflict
+        if (Debug.isOutputEnabled && Csv.isOutputEnabled) {
+            System.err.println("Cannot use -Ddebug and -Dcsv at the same time.");
+            System.exit(-1);
         }
-
+        // Population count is split up into islands, which must be of equal size to make sense
+        if (populationSize_ % islandAmount_ != 0) {
+            System.err.println("Population size is not divisible by number of islands.");
+            System.exit(-1);
+        }
+        // If not divisible, number of evaluations is not kept track of properly
         if (parentCountPerGeneration_ % recombinationArity_ != 0) {
             System.err.println("Parents per generation is not divisible by recombination arity.");
             System.exit(-1);
         }
+
         
-        // Added by Jon. Compute (m-1) points used for crossover once, but allow for recomputing
-        // them later in case we want to modify it on-the-fly
-        setCrossoverBoundaries(recombinationArity_);
-	}
+    }
 
     private static void disableConsolePrinting () {
         System.setOut(new PrintStream(new OutputStream() {
@@ -216,7 +234,7 @@ public class player34 implements ContestSubmission
         for (List<Individual> pg : parentGroups) {
             // Do the crossover with recombination probability defined at top
             r = rnd_.nextDouble();
-            if (r < recombinationProbability) {
+            if (r < recombinationProbability_) {
                 children.addAll(mMinusOnePointCrossover(pg, arity));
             }
             // Else just add the unchanged parents to the kids 
@@ -282,7 +300,7 @@ public class player34 implements ContestSubmission
         // Initialize population(s)
         for (int i=0; i<islandAmount_; i++){
             islandList[i] = new Population(populationPerIsland);
-            islandList[i].evaluate(sharedFitness, sigmaShare);
+            islandList[i].evaluate(sharedFitness_, sigmaShare_);
             islandList[i].print();
         }
 
@@ -308,16 +326,24 @@ public class player34 implements ContestSubmission
             // do for each island
             for (int i=0; i<islandAmount_; i++) {
                 // Select parents
-                List<Individual> parents = islandList[i].tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
-                List<Individual> children = recombine(parents, recombinationArity_);
+                List<Individual> parents = islandList[i].tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness_);
                 // Apply crossover / mutation operators
+                List<Individual> children = new ArrayList<Individual>();
+                if (enableRecombination_) {
+                    children = recombine(parents, recombinationArity_);
+                } else {
+                    // Just copy the parents using copy constructor
+                    for (Individual parent : parents) {
+                        children.add(new Individual(parent));
+                    }
+                }
                 mutate(children);
                 islandList[i].addAll(children);
                 // Check fitness of unknown fuction
-                islandList[i].evaluate(sharedFitness, sigmaShare); // skips those who already have been evaluated
+                islandList[i].evaluate(sharedFitness_, sigmaShare_); // skips those who already have been evaluated
                 evaluationCount += parentCountPerGeneration_; // same as number of children atm
                 // Select survivors
-                islandList[i].individuals = islandList[i].tournamentSelection(populationPerIsland, 5, true, sharedFitness);
+                islandList[i].individuals = islandList[i].tournamentSelection(populationPerIsland, 5, true, sharedFitness_);
 
                 // Debug print 10 times
                 if (evaluationCount % (evaluations_limit_ / 10) == 0) {
