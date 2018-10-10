@@ -30,7 +30,7 @@ public class player34 implements ContestSubmission
     public static boolean sharedFitness = true;
     public static double sigmaShare = 0.001;
     public static double recombinationProbability = 1.0;  // Added by Jon
-    public static int recombinationArity = 2;             // Added by Jon
+    public static int recombinationArity_ = 2;             // Added by Jon
 
     // provided fields (do not touch)
 	public static Random rnd_;
@@ -92,6 +92,11 @@ public class player34 implements ContestSubmission
         }
 
         // set how many iterations go into an epoch (basically migration interval)
+        if (System.getProperty("recombarity") != null) {
+            recombinationArity_ = Integer.parseInt(System.getProperty("recombarity"));
+        }
+
+        // set how many iterations go into an epoch (basically migration interval)
         if (System.getProperty("nofitnesssharing") != null) {
             sharedFitness = false;
         }
@@ -103,7 +108,7 @@ public class player34 implements ContestSubmission
         
         // Added by Jon. Compute (m-1) points used for crossover once, but allow for recomputing
         // them later in case we want to modify it on-the-fly
-        setCrossoverBoundaries(recombinationArity);
+        setCrossoverBoundaries(recombinationArity_);
 	}
 
     private static void disableConsolePrinting () {
@@ -304,7 +309,7 @@ public class player34 implements ContestSubmission
             for (int i=0; i<islandAmount_; i++) {
                 // Select parents
                 List<Individual> parents = islandList[i].tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness);
-                List<Individual> children = recombine(parents, 2);
+                List<Individual> children = recombine(parents, recombinationArity_);
                 // Apply crossover / mutation operators
                 mutate(children);
                 islandList[i].addAll(children);
