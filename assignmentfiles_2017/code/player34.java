@@ -23,10 +23,10 @@ public class player34 implements ContestSubmission
 
     // configurable parameters
     public static int islandAmount_ = 1;
-    public static int epoch_ = 50;
+    public static int iterationsPerEpoch_ = 50;
     public static int migrationSize_ = 2;
     public static int populationSize_ = 100;
-    public static int parentCountPerGeneration_ = 6;
+    public static int parentCountPerIteration_ = 6;
     public static boolean sharedFitness_ = false;
     public static double sigmaShare_ = 0.001;
     public static boolean enableRecombination_ = false;
@@ -65,7 +65,7 @@ public class player34 implements ContestSubmission
         }
         // set how many parents are selected each generation (also number of children)
         if (System.getProperty("parentcount") != null) {
-            parentCountPerGeneration_ = Integer.parseInt(System.getProperty("parentcount"));
+            parentCountPerIteration_ = Integer.parseInt(System.getProperty("parentcount"));
         }
 
 
@@ -75,8 +75,8 @@ public class player34 implements ContestSubmission
             islandAmount_ = Integer.parseInt(System.getProperty("islands"));
         }
         // set how many iterations go into an epoch (basically migration interval)
-        if (System.getProperty("epoch") != null) {
-            epoch_ = Integer.parseInt(System.getProperty("epoch"));
+        if (System.getProperty("epochsize") != null) {
+            iterationsPerEpoch_ = Integer.parseInt(System.getProperty("epochsize"));
         }
         // set how many iterations go into an epoch (basically migration interval)
         if (System.getProperty("migrationsize") != null) {
@@ -121,7 +121,7 @@ public class player34 implements ContestSubmission
             System.exit(-1);
         }
         // If not divisible, number of evaluations is not kept track of properly
-        if (parentCountPerGeneration_ % recombinationArity_ != 0) {
+        if (parentCountPerIteration_ % recombinationArity_ != 0) {
             System.err.println("Parents per generation is not divisible by recombination arity.");
             System.exit(-1);
         }
@@ -295,13 +295,13 @@ public class player34 implements ContestSubmission
         int populationPerIsland = populationSize_ / islandAmount_;
 
         // Initialize islands
-        Population[] islandList = new Population[islandAmount_];
+        Population[] islands = new Population[islandAmount_];
 
         // Initialize population(s)
         for (int i=0; i<islandAmount_; i++){
-            islandList[i] = new Population(populationPerIsland);
-            islandList[i].evaluate(sharedFitness_, sigmaShare_);
-            islandList[i].print();
+            islands[i] = new Population(populationPerIsland);
+            islands[i].evaluate(sharedFitness_, sigmaShare_);
+            islands[i].print();
         }
 
         // Print CSV header
@@ -311,8 +311,8 @@ public class player34 implements ContestSubmission
         // Consider the individuals on different islands as one giant population for stats
         Debug.printf("Evaluation count: %d / %d\n", populationSize_, evaluations_limit_);
         Population continent = new Population(0);
-        for (Population pop : islandList) {
-            continent.individuals.addAll(pop.individuals);
+        for (Population island : islands) {
+            continent.individuals.addAll(island.individuals);
         }
         Csv.printData(populationSize_, 
             continent.getMaxFitness(), 
@@ -323,10 +323,9 @@ public class player34 implements ContestSubmission
         boolean hasRunOutOfEvaluations = false;
 
         do {
-            // do for each island
-            for (int i=0; i<islandAmount_; i++) {
+            for (Population island : islands) {
                 // Select parents
-                List<Individual> parents = islandList[i].tournamentSelection(parentCountPerGeneration_, 5, true, sharedFitness_);
+                List<Individual> parents = island.tournamentSelection(parentCountPerIteration_, 5, true, sharedFitness_);
                 // Apply crossover / mutation operators
                 List<Individual> children = new ArrayList<Individual>();
                 if (enableRecombination_) {
@@ -338,24 +337,24 @@ public class player34 implements ContestSubmission
                     }
                 }
                 mutate(children);
-                islandList[i].addAll(children);
+                island.addAll(children);
                 // Check fitness of unknown fuction
-                islandList[i].evaluate(sharedFitness_, sigmaShare_); // skips those who already have been evaluated
-                evaluationCount += parentCountPerGeneration_; // same as number of children atm
+                island.evaluate(sharedFitness_, sigmaShare_); // skips those who already have been evaluated
+                evaluationCount += parentCountPerIteration_; // same as number of children atm
                 // Select survivors
-                islandList[i].individuals = islandList[i].tournamentSelection(populationPerIsland, 5, true, sharedFitness_);
+                island.individuals = island.tournamentSelection(populationPerIsland, 5, true, sharedFitness_);
 
                 // Debug print 10 times
                 if (evaluationCount % (evaluations_limit_ / 10) == 0) {
                     Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
-                    islandList[0].print();
+                    islands[0].print();
                 }
 
                 // Print to file 100 times
                 if (evaluationCount % (evaluations_limit_ / 100) == 0) {
                     // Consider the individuals on different islands as one giant population for stats
                     continent = new Population(0);
-                    for (Population pop : islandList) {
+                    for (Population pop : islands) {
                         continent.individuals.addAll(pop.individuals);
                     }
                     Csv.printData(evaluationCount, 
@@ -364,26 +363,25 @@ public class player34 implements ContestSubmission
                         continent.returnBestn(1).get(0).mutationRate);
                 }
 
-                boolean isTimeForMigration = islandAmount_ > 1 && evaluationCount % (epoch_*populationSize_) == 0;
+                boolean isTimeForMigration = islandAmount_ > 1 && evaluationCount % (iterationsPerEpoch_*populationSize_) == 0;
                 if (isTimeForMigration) {
                     // Get the best individuals from each island and put in list
                     List<List<Individual>> listBestIndividuals= new ArrayList<List<Individual>>();
-                    for (int j=0; j<islandAmount_; j++) {
-                        listBestIndividuals.add(islandList[j].returnBestn(migrationSize_));
-
+                    for (Population otherIsland : islands) {
+                        listBestIndividuals.add(otherIsland.returnBestn(migrationSize_));
                     }
                     // forcefully re-allocate them to the next island.
                     for (int j=0; j<islandAmount_; j++) {
                         for (int k=0; k<listBestIndividuals.get(j).size();k++){
-                            islandList[j].individuals.remove(0);
-                            islandList[j].individuals.add(listBestIndividuals.get((j+1) % islandAmount_).get(k));
+                            islands[j].individuals.remove(0);
+                            islands[j].individuals.add(listBestIndividuals.get((j+1) % islandAmount_).get(k));
                         }
                     }
                 }
             }
 
             // Predict if we run out of evaluations before the end of the next iteration
-            hasRunOutOfEvaluations = evaluationCount + parentCountPerGeneration_ * islandAmount_ > evaluations_limit_;
+            hasRunOutOfEvaluations = evaluationCount + parentCountPerIteration_ * islandAmount_ > evaluations_limit_;
         } while (!hasRunOutOfEvaluations);
 
         // When printing to csv is enabled, prevent the end of
