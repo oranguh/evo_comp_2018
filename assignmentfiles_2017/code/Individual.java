@@ -6,12 +6,12 @@ public class Individual {
 
 	public double[] genes;
 	public double mutationRate;
-	public double fitness;
-	public double fitnessShared;
+	private double fitness;
+	public double fitnessShare;
 
 	public Individual () {
 		this.fitness = UNDETERMINED_FITNESS_VALUE;
-		this.fitnessShared = UNDETERMINED_FITNESS_VALUE;
+		this.fitnessShare = 1.0;
 		this.mutationRate = DEFAULT_MUTATION_RATE;
 		this.genes = new double[NUM_GENES];
 		// Initialize with random genes
@@ -25,16 +25,20 @@ public class Individual {
 
 	// Copy constructor used for creating offspring
 	public Individual (Individual that) {
-		this.genes = new double[10];
-		this.mutationRate = that.mutationRate;
+		this.genes = new double[NUM_GENES];
 		for (int i=0; i<this.genes.length; i++) {
 			this.genes[i] = that.genes[i];
 		}
+		this.mutationRate = that.mutationRate;
 		// Fitness should not be inherited, but copy it and 
 		// undo it later because we're a motherfucking copy 
 		// constructor over here
 		this.fitness = that.fitness;
-		this.fitnessShared = that.fitnessShared;
+		this.fitnessShare = that.fitnessShare;
+	}
+
+	public double getFitness () {
+		return this.fitness * this.fitnessShare;
 	}
 
 	public void evaluate () {
@@ -48,7 +52,7 @@ public class Individual {
 	public void resetFitness () {
 		// Individual fitness is not evaluated unless it is this value
 		this.fitness = UNDETERMINED_FITNESS_VALUE;
-		this.fitnessShared = UNDETERMINED_FITNESS_VALUE;
+		this.fitnessShare = 1.0;
 	}
 
 	@Override

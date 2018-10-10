@@ -32,5 +32,5 @@ jar cmf MainClass.txt submission.jar "${newClassFiles[@]}"
 
 printf "Build complete.\n\n"
 printf "Running instance:\n"
-java -Dsharefitness -Dislands=4 -Drecombination -jar testrun.jar -submission=player34 -evaluation=BentCigarFunction -seed=1
+java -Dsharefitness -Dislands=4 -Drecombination=m-1crossover -jar testrun.jar -submission=player34 -evaluation=BentCigarFunction -seed=1
 printf "\n"

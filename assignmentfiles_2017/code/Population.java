@@ -5,7 +5,8 @@ import java.util.stream.DoubleStream;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class Population {
+public class Population 
+{
 	public List<Individual> individuals;
 
 	public Population (int populationSize) {
@@ -42,7 +43,7 @@ public class Population {
                 double distance = calculateEuclideanDistance(individual_i.genes, individual_j.genes);
                 sharedSum += sharedD(distance, sigmaShare);
             }
-            individual_i.fitnessShared = individual_i.fitness / sharedSum;
+            individual_i.fitnessShare = 1.0 / sharedSum;
         }
     }
 
@@ -60,87 +61,10 @@ public class Population {
         return output;
     }
 
-    public List<Individual> fitnessProportionalSelection (int drawCount) {
-		List<Individual> populationCopy = new ArrayList<Individual>(this.individuals);
-		List<Individual> chosenOnes = new ArrayList<Individual>();
-		
-    	// Randomly select from pie, where pie is distributed according to fitness
-		for (int i=0; i<drawCount; i++) {
-			// Compute the total weight of all items together
-			double totalWeight = 0.0;
-			for (Individual individual : populationCopy) {
-			    totalWeight += individual.fitness;
-			}
-
-			// Now choose a random item
-			double random = player34.rnd_.nextDouble() * totalWeight;
-			for (Individual individual : populationCopy) {
-			    random -= individual.fitness;
-			    if (random <= 0.0) {
-			    	populationCopy.remove(individual); // prevent replacement 
-			        chosenOnes.add(individual);
-			        break;
-			    }
-			}
-		}
-		return chosenOnes;
-    }
-    
-    public List<Individual> tournamentSelectionWithReplacement (int drawCount, int k) {
-        return tournamentSelection(drawCount, k, true, true);
-    }
-
-    public List<Individual> tournamentSelectionWithoutReplacement (int drawCount, int k) {
-        return tournamentSelection(drawCount, k, false, true);
-    }
-
-    public List<Individual> tournamentSelection (int drawCount, int k, boolean withReplacement, boolean sharedFitness) {
-        List<Individual> populationCopy = new ArrayList<Individual>(this.individuals);
-        List<Individual> competitionPool = new ArrayList<Individual>();
-        List<Individual> chosenOnes = new ArrayList<Individual>();
-        Individual randomIndividual, winner;
-        
-        // drawCount and k should not be bigger than the population size
-        //if (drawCount > individuals.size() || k > individuals.size()) {
-        	//throw new IllegalArgumentException("drawCount and k should not exceed population size.");
-        //}
-
-        for (int i = 0; i < drawCount; i++) {
-        	// If not with replacement, individuals are removed from the population
-        	// so population should be reset before every tournament iteration
-        	if (!withReplacement) {
-        		populationCopy.clear();
-        		populationCopy.addAll(this.individuals);
-        	}
-            competitionPool.clear();
-            
-            // Choose k random individuals and add to competition pool,
-            // withReplacement bool indicates whether individuals can be
-            // added repeatedly to the same tournament
-            for (int j = 0; j < k; j++) {
-                randomIndividual = populationCopy.get(player34.rnd_.nextInt(populationCopy.size()));
-                if (!withReplacement)  populationCopy.remove(randomIndividual);
-                competitionPool.add(randomIndividual);
-            }
-
-            // Compare these k individuals and select the best of them;
-            winner = competitionPool.get(0);
-            for (Individual individual : competitionPool) {
-                if (sharedFitness == true) {
-                    if (individual.fitnessShared> winner.fitnessShared)  winner = individual;
-                } else{
-                    if (individual.fitness> winner.fitness)  winner = individual;
-                }
-            }
-            chosenOnes.add(winner);
-        }
-        return chosenOnes;       
-    }    
-
     public double getMaxFitness () {
     	double maxFitness = 0.0;
     	for (Individual individual : this.individuals) {
-    		maxFitness = Math.max(maxFitness, individual.fitness);
+    		maxFitness = Math.max(maxFitness, individual.getFitness());
     	}
     	return maxFitness;
     }
@@ -148,7 +72,7 @@ public class Population {
     public double getAverageFitness () {
     	double totalFitness = 0.0;
     	for (Individual individual : this.individuals) {
-    		totalFitness += individual.fitness;
+    		totalFitness += individual.getFitness();
     	}
     	return totalFitness / this.individuals.size();
     }
@@ -186,10 +110,10 @@ public class Population {
         Collections.sort(sortedPop, new Comparator<Individual>() {
             public int compare(Individual i1, Individual i2) {
 
-                if(i1.fitness > i2.fitness) {
+                if(i1.getFitness() > i2.getFitness()) {
                     return -1;
                 }
-                else if(i1.fitness < i2.fitness) {
+                else if(i1.getFitness() < i2.getFitness()) {
                     return 1;
                 }
                 return 0;
