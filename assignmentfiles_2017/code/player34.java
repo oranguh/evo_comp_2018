@@ -23,10 +23,10 @@ public class player34 implements ContestSubmission
 
     // configurable parameters
     public static int islandAmount_ = 5;
-    public static int epoch_ = 25;
+    public static int epoch_ = 50;
     public static int migrationSize_ = 1;
-    public static int populationSize_ = 100;
-    public static int parentCountPerGeneration_ = 5;
+    public static int populationSize_ = 200;
+    public static int parentCountPerGeneration_ = 6;
     public static boolean sharedFitness = true;
     public static double sigmaShare = 0.001;
     public static double recombinationProbability = 1.0;  // Added by Jon
@@ -89,6 +89,16 @@ public class player34 implements ContestSubmission
         // set how many iterations go into an epoch (basically migration interval)
         if (System.getProperty("migrationsize") != null) {
             migrationSize_ = Integer.parseInt(System.getProperty("migrationsize"));
+        }
+
+        // set how many iterations go into an epoch (basically migration interval)
+        if (System.getProperty("nofitnesssharing") != null) {
+            sharedFitness = false;
+        }
+
+        if (parentCountPerGeneration_ % recombinationArity != 0) {
+            System.err.println("Parents per generation is not divisible by recombination arity.");
+            System.exit(-1);
         }
         
         // Added by Jon. Compute (m-1) points used for crossover once, but allow for recomputing
