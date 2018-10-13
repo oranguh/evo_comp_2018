@@ -138,6 +138,10 @@ public class player34 implements ContestSubmission
                 case "fitnessproportional":
                     survivorSelection = new FitnessProportionalSelection();
                     break;
+
+                case "CMA-ES":
+                    survivorSelection = new CmaEs();
+                    break;
             }
         } else {
             // default
@@ -153,6 +157,10 @@ public class player34 implements ContestSubmission
                 case "m-1crossover":
                     recombination = new MMinusOnePointCrossover();
                     break;
+
+                case "CMA-ES":
+                    recombination = new CmaEs();
+                    break;
             }
         } else {
             // default
@@ -163,6 +171,10 @@ public class player34 implements ContestSubmission
             switch (System.getProperty("mutation")) {
                 case "adaptivegauss":
                     mutation = new AdaptiveGaussianPerturbation();
+                    break;
+
+                case "none":
+                    mutation = new NoMutation();
                     break;
             }
         } else {

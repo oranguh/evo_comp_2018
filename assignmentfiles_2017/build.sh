@@ -1,5 +1,6 @@
 #!/bin/bash
 shopt -s nullglob
+shopt -s globstar
 
 # don't delete these class files
 blacklist=( "BentCigarFunction.class" "KatsuuraEvaluation.class" "SchaffersEvaluation.class" "SphereEvaluation.class" )
@@ -15,14 +16,14 @@ rm -f "${oldClassFiles[@]}"
 
 
 # compile classes
-javaFiles=(code/*.java)
+javaFiles=(code/**/*.java)
 printf "\nCompiling following files:\n"
 printf '\t%s\n' "${javaFiles[@]}"
-javac -d . -cp contest.jar "${javaFiles[@]}"
+javac -d . -cp ".:contest.jar" "${javaFiles[@]}"
 
 
 # pack new class files
-newClassFiles=(*.class)
+newClassFiles=(**/*.class)
 for i in "${blacklist[@]}"; do
     newClassFiles=(${newClassFiles[@]//*$i*})
 done
@@ -32,5 +33,5 @@ jar cmf MainClass.txt submission.jar "${newClassFiles[@]}"
 
 printf "Build complete.\n\n"
 printf "Running instance:\n"
-java -Dsharefitness -Dislands=4 -Drecombination=m-1crossover -jar testrun.jar -submission=player34 -evaluation=BentCigarFunction -seed=1
+java -Dsharefitness -Dislands=4 -Dparentselection=all -Drecombination=CMA-ES -Dmutation=none -Dsurvivorselection=CMA-ES -jar testrun.jar -submission=player34 -evaluation=BentCigarFunction -seed=1
 printf "\n"
