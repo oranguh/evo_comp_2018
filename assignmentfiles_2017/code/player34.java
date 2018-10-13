@@ -28,6 +28,7 @@ public class player34 implements ContestSubmission
     public static int parentCountPerIteration_ = 6;
     public static boolean shareFitness_ = false;
     public static double sigmaShare_ = 0.001;
+    public static boolean isGenerationalModel_ = false;
 
     // Tableau components
     private SelectionOperator parentSelection;
@@ -70,6 +71,10 @@ public class player34 implements ContestSubmission
         // set how many parents are selected each generation (also number of children)
         if (System.getProperty("parentcount") != null) {
             parentCountPerIteration_ = Integer.parseInt(System.getProperty("parentcount"));
+        }
+        // In generational models, the offspring replace the population every iterations
+        if (System.getProperty("isgenerational") != null) {
+            isGenerationalModel_ = true;
         }
 
 
@@ -242,7 +247,11 @@ public class player34 implements ContestSubmission
                 // Apply random mutation
                 mutation.mutate(children);
                 // Add new individuals to population
-                island.addAll(children);
+                if (isGenerationalModel_) {
+                    island.individuals = children;
+                } else {
+                    island.individuals.addAll(children);
+                }
                 // Calculate fitness of new individuals
                 island.evaluate(shareFitness_, sigmaShare_);
                 evaluationCount += children.size();
