@@ -297,7 +297,12 @@ public class player34 implements ContestSubmission
                 // Debug print 10 times
                 if (evaluationCount % (evaluations_limit_ / 10) == 0) {
                     Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
-                    islands[0].print();
+                    continent = new Population(0);
+                    for (Population pop : islands) {
+                        continent.individuals.addAll(pop.individuals);
+                    }
+                    System.out.println(continent.individuals.size());
+                    continent.print();
                 }
 
                 // Print to file 100 times

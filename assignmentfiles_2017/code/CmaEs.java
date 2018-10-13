@@ -13,7 +13,7 @@ public class CmaEs implements RecombinationOperator, SelectionOperator
 
 	private static double[] mean;
 	private static double[][] cov;
-	private static int lambda = 10; // number of children/samples
+	private static int lambda = 30; // number of children/samples
 	private static int mu; // estimate new mean from this many best children
 	private static int d_;
 
