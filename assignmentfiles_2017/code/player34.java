@@ -73,7 +73,7 @@ public class player34 implements ContestSubmission
             parentCountPerIteration_ = Integer.parseInt(System.getProperty("parentcount"));
         }
         // In generational models, the offspring replace the population every iterations
-        if (System.getProperty("isgenerational") != null) {
+        if (System.getProperty("generational") != null) {
             isGenerationalModel_ = true;
         }
 
@@ -118,6 +118,10 @@ public class player34 implements ContestSubmission
 
                 case "fitnessproportional":
                     parentSelection = new FitnessProportionalSelection();
+                    break;
+
+                case "all":
+                    parentSelection = new SelectAll();
                     break;
             }
         } else {
