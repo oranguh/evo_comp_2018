@@ -43,16 +43,16 @@ public class MMinusOnePointCrossover implements RecombinationOperator
          
         // Get number of parents in total recombination pool. If there's an 
         // 'unpairable' set of size < m then return these without changing 'em
-        int parentCount = parents.size();
-        int nIgnored = parentCount % arity_;
-        parentCount = parentCount - nIgnored;
-        for (int i = parentCount; i < parents.size(); i++) {
+        int pairableParentCount = parents.size();
+        int nIgnored = pairableParentCount % arity_;
+        pairableParentCount -= nIgnored;
+        for (int i = pairableParentCount; i < parents.size(); i++) {
         	children.add(parents.get(i));
         }
         
         // Add parents to reproductive groups of size m (FOR SEX)
         int counter = 0;
-        for (int i = 0; i < parentCount; i++) {
+        for (int i = 0; i < pairableParentCount; i++) {
             parentGroup.add(parents.get(i));
             counter++;
             if (counter == arity_) {
@@ -85,20 +85,23 @@ public class MMinusOnePointCrossover implements RecombinationOperator
     // input group of parents
     private List<Individual> mMinusOnePointCrossover(List<Individual> parentGroup) {
         List<Individual> children = new ArrayList<Individual>();
-        Individual child;
+        Individual child, parent;
         int childIndex, parentIndex, geneIndex;
         for (childIndex = 0; childIndex < arity_; childIndex++) {
-            child = new Individual();
+        	parentIndex = childIndex;
+        	parent = parentGroup.get(parentIndex);
+        	child = new Individual(parent);
             geneIndex = 0;
-            parentIndex = childIndex;
             // Iterate towards each boundary and iteratively change the 'parentIndex'
             // after each boundary so that alleles are selected from alternating parents
             for (int boundary : crossoverBoundaries_) {  // boundaries always include last index of genes
                 while (geneIndex <= boundary) {
-                    child.genes[geneIndex] = parentGroup.get(parentIndex).genes[geneIndex];
+                    child.genes[geneIndex] = parent.genes[geneIndex];
+                    child.mutationRates[geneIndex] = parent.mutationRates[geneIndex];
                     geneIndex++;
                 }
-                parentIndex = (parentIndex + 1) % arity_;  // (loop around)
+                parentIndex = (parentIndex + 1) % arity_;  // (wrap around)
+                parent = parentGroup.get(parentIndex);
             }
             children.add(child);
         }

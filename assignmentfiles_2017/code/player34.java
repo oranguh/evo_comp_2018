@@ -247,8 +247,9 @@ public class player34 implements ContestSubmission
         }
         Csv.printData(populationSize_, 
             continent.getMaxFitness(), 
-            continent.getAverageDistanceFromMean(), 
-            continent.returnBestn(1).get(0).mutationRate);
+            continent.getAverageDistanceFromMean(),
+        	// ONLY PRINTING FIRST MUTATION RATE
+            continent.returnBestn(1).get(0).mutationRates[0]);
 
         int evaluationCount = populationSize_;
         boolean hasRunOutOfEvaluations = false;
@@ -301,7 +302,7 @@ public class player34 implements ContestSubmission
                     for (Population pop : islands) {
                         continent.individuals.addAll(pop.individuals);
                     }
-                    System.out.println(continent.individuals.size());
+                    System.out.println(evaluationCount);
                     continent.print();
                 }
 
@@ -314,8 +315,9 @@ public class player34 implements ContestSubmission
                     }
                     Csv.printData(evaluationCount, 
                         continent.getMaxFitness(), 
-                        continent.getAverageDistanceFromMean(), 
-                        continent.returnBestn(1).get(0).mutationRate);
+                        continent.getAverageDistanceFromMean(),
+                        // JON: ONLY PRINTING FIRST MUTATION RATE
+                    	continent.returnBestn(1).get(0).mutationRates[0]);
                 }
             }
 
