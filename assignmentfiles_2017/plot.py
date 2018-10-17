@@ -89,18 +89,21 @@ for i in range(1, metricCount):
 	axis.plot(means[:,0], means[:,i], color=colors[i], alpha=1.0, label=metricNames[i], path_effects=[outline])
 
 # Plot MBF and convergence time as cross, where crossover is average, and lengths indicate std
-fitnessAxis.plot([meanConvergence, meanConvergence], [meanBestFitness - stdBestFitness, meanBestFitness + stdBestFitness], 'r-')
-fitnessAxis.plot([meanConvergence - stdConvergence, meanConvergence + stdConvergence], [meanBestFitness, meanBestFitness], 'r-')
+#fitnessAxis.plot([meanConvergence, meanConvergence], [meanBestFitness - stdBestFitness, meanBestFitness + stdBestFitness], 'r-')
+#fitnessAxis.plot([meanConvergence - stdConvergence, meanConvergence + stdConvergence], [meanBestFitness, meanBestFitness], 'r-')
 
 # Some further layout
-plt.title(args.title)
-fig.tight_layout()
+#plt.title(args.title)
+#fig.tight_layout()
 
 # Save to file
-plt.savefig(args.dst, bbox_inches='tight', dpi=150)
+#plt.savefig(args.dst, bbox_inches='tight', dpi=150)
 
 # Print results
 print("MBF: %.3E (+- %.3E)" % (meanBestFitness, stdBestFitness))
 print("CVG: %.3E (+- %.3E)" % (meanConvergence, stdConvergence))
 
-csvString = arg.title + ";" + meanBestFitness + ";" + stdBestFitness + ";" + meanConvergence + ";" + stdConvergence
+csvString = args.title + ";" + str(meanBestFitness) + ";" + str(stdBestFitness) + ";" + str(meanConvergence) + ";" + str(stdConvergence) + "\n"
+with open('master.csv', 'a+') as csvFile:
+	csvFile.write(csvString)
+

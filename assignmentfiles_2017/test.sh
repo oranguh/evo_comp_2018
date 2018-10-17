@@ -28,10 +28,6 @@
 # Get testName and runCount from parameters
 testName="$1"
 runCount="$2"
-islands="$3"
-epochsize="$4"
-sharefitness="$5"
-sigma="$6"
 if [ -z "$testName" ] || [ -z "$runCount" ]
 then
 	echo "usage: test.sh <test_name> <runcount>"
@@ -50,7 +46,7 @@ do
 	for (( i=1; i<=runCount; i++ ))
 	do
 		((seed++))
-		java "${@:3}" -Dcsv -jar testrun.jar -submission=player34 -evaluation="${evalName}" -seed="${seed}" -islands="${islands}" -epochsize="${epochsize}" -sharefitness="${sharefitness}" -sigma="${sigma}" > "tests/${testName}/${evalName}/metrics_${seed}.csv"
+		java "${@:3}" -Dcsv -jar testrun.jar -submission=player34 -evaluation="${evalName}" -seed="${seed}" > "tests/${testName}/${evalName}/metrics_${seed}.csv"
 	done
 	wait
 	# Run python script that loads csv files for each evaluation and plots metrics

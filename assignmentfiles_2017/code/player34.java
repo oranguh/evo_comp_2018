@@ -302,7 +302,7 @@ public class player34 implements ContestSubmission
                     for (Population pop : islands) {
                         continent.individuals.addAll(pop.individuals);
                     }
-                    System.out.println(evaluationCount);
+                    //System.out.println(evaluationCount);
                     continent.print();
                 }
 
