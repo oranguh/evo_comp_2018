@@ -13,11 +13,13 @@ for islandN in "${islandNs[@]}"; do
 		for epoch in "${epochs[@]}"; do
 			runName="$islandN;$epoch;false;0.0"
 			parameterString="-Dislands=${islandN} -Depochsize=${epoch}"
+			parameterString="${parameterString} $defaultParameters"
 			./test.sh $runName 10 $parameterString
 		done
 	elif [[ $islandN == 1 ]]; then
 		runName="$islandN;0;false;0.0"
 		parameterString="-Dislands=${islandN}"
+		parameterString="${parameterString} $defaultParameters"
 		./test.sh $runName 10 $parameterString
 	fi
 done
@@ -30,6 +32,7 @@ for islandN in "${islandNs[@]}"; do
 			for sigma in "${sigmas[@]}"; do
 				runName="$islandN;$epoch;true;${sigma}"
 				parameterString="-Dislands=${islandN} -Depochsize=${epoch} -Dsharefitness -Dsigma=${sigma}"
+				parameterString="${parameterString} $defaultParameters"
 				./test.sh $runName 10 $parameterString
 			done
 		done
@@ -37,6 +40,7 @@ for islandN in "${islandNs[@]}"; do
 		for sigma in "${sigmas[@]}"; do
 			runName="$islandN;0;true;${sigma}"
 			parameterString="-Dislands=${islandN} -Depochsize=${epoch} -Dsharefitness -Dsigma=${sigma}"
+			parameterString="${parameterString} $defaultParameters"
 			./test.sh $runName 10 $parameterString
 		done
 	fi
