@@ -4,7 +4,7 @@ sigmas=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9)
 islandNs=(1 2 4 5)
 epochs=(10 20 30 40 50)
 
-defaultParameters="-Dpopsize=100 -Dparentcount=6 -Dgenerational -Dparentselection=tournament -Dmigrationsize=2 -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss"
+defaultParameters="-Dpopsize=100 -Dparentcount=10 -Dparentselection=tournament -Dmigrationsize=2 -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss"
 
 # Fitness sharing off
 fitnessBool=false
