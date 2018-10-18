@@ -3,8 +3,8 @@ public class Individual {
 	private static final double UNDETERMINED_FITNESS_VALUE = -1.0;
 	private static final double DEFAULT_MUTATION_RATE = 1.0;
 	public static final int NUM_GENES = 10;
-	public static final double TAU = 1.0 / Math.sqrt(player34.PROBLEM_DIMENSIONALITY);
-	public static final double TAU_PRIME = 1.0 / Math.pow(player34.PROBLEM_DIMENSIONALITY, (1/4));
+	public static final double TAU = 1.0 / Math.sqrt(2*Math.sqrt(player34.PROBLEM_DIMENSIONALITY));
+	public static final double TAU_PRIME = 1.0 / Math.sqrt(2*player34.PROBLEM_DIMENSIONALITY);
 
 	public double[] genes;
 	public double[] mutationRates;
