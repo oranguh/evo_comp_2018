@@ -20,6 +20,10 @@ public class MMinusOnePointCrossover implements RecombinationOperator
             System.exit(-1);
         }
 
+        if (System.getProperty("recombinationProbability") != null) {
+            recombinationProbability_ = Double.parseDouble(System.getProperty("recombinationProbability"));
+        }
+
         // Compute (m-1) points used for crossover once, but allow for recomputing
         // them later in case we want to modify it on-the-fly
         setcrossoverBoundaries();
