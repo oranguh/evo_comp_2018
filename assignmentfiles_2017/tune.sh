@@ -1,6 +1,6 @@
 evalNames=( "BentCigarFunction" "SchaffersEvaluation" )
 
-sigmas=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9)
+sigmas=(0.001 0.003 0.01 0.03 0.1 0.3 1 3)
 islandNs=(1 2 4 5)
 epochs=(10 20 30 40 50)
 
