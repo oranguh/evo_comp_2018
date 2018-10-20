@@ -14,18 +14,16 @@
 # migrationsizes=(2)
 
 # baseline parameters
-popsizes=(50 100 200 400)
+popsizes=(400)
 parentcounts=(24)
 aritys=(3)
-recombinationProbabilitys=(1.0)
-recombinationProbabilitys=(0.99)
+recombinationProbabilitys=(1)
 ks=(2)
 
 # Model extension parameters
-sigmas=(0.2 0.4 0.7 1.0)
-sigmas=(0.0003 0.001 0.003 0.01)
-islandNs=(1 2 4 8)
-epochs=(5 15 45)
+sigmas=(0.05)
+islandNs=(1)
+epochs=(5)
 migrationsizes=(2)
 
 defaultParameters="-Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss"
