@@ -219,6 +219,20 @@ public class player34 implements ContestSubmission
             // Do sth else
         }
     }
+
+    private void printCsv (Population[] islands, int evaluationCount)
+    {
+        // Consider the individuals on different islands as one giant population for stats
+        Population continent = new Population(0);
+        for (Population pop : islands) {
+            continent.individuals.addAll(pop.individuals);
+        }
+        Csv.printData(evaluationCount, 
+            continent.getMaxFitness(), 
+            continent.getAverageDistanceFromMean(),
+            // JON: ONLY PRINTING FIRST MUTATION RATE
+            continent.returnBestn(1).get(0).mutationRates[0]);
+    }
     
 	public void run()
 	{
@@ -238,22 +252,12 @@ public class player34 implements ContestSubmission
         // Print CSV header
         Csv.printHeader("Evaluations", "Max fitness", "Diversity", "Mutation rate");
 
-        // Add data point of initial population
-        // Consider the individuals on different islands as one giant population for stats
-        Debug.printf("Evaluation count: %d / %d\n", populationSize_, evaluations_limit_);
-        Population continent = new Population(0);
-        for (Population island : islands) {
-            continent.individuals.addAll(island.individuals);
-        }
-        Csv.printData(populationSize_, 
-            continent.getMaxFitness(), 
-            continent.getAverageDistanceFromMean(),
-        	// ONLY PRINTING FIRST MUTATION RATE
-            continent.returnBestn(1).get(0).mutationRates[0]);
-
         int evaluationCount = populationSize_;
         boolean hasRunOutOfEvaluations = false;
 
+        // Add data point of initial population
+        printCsv(islands, evaluationCount);
+        int oldStepCheck = 0;
         do {
             for (Population island : islands) {
                 // Core evolutionary algorithm
@@ -298,7 +302,7 @@ public class player34 implements ContestSubmission
                 // Debug print 10 times
                 if (evaluationCount % (evaluations_limit_ / 10) == 0) {
                     Debug.printf("Evaluation count: %d / %d\n", evaluationCount, evaluations_limit_);
-                    continent = new Population(0);
+                    Population continent = new Population(0);
                     for (Population pop : islands) {
                         continent.individuals.addAll(pop.individuals);
                     }
@@ -306,24 +310,18 @@ public class player34 implements ContestSubmission
                     continent.print();
                 }
 
-                // Print to file 100 times
-                if (evaluationCount % (evaluations_limit_ / 100) == 0) {
-                    // Consider the individuals on different islands as one giant population for stats
-                    continent = new Population(0);
-                    for (Population pop : islands) {
-                        continent.individuals.addAll(pop.individuals);
-                    }
-                    Csv.printData(evaluationCount, 
-                        continent.getMaxFitness(), 
-                        continent.getAverageDistanceFromMean(),
-                        // JON: ONLY PRINTING FIRST MUTATION RATE
-                    	continent.returnBestn(1).get(0).mutationRates[0]);
+                // Print to file 1000 times
+                int newStepCheck = evaluationCount % (evaluations_limit_ / 1000);
+                if (newStepCheck < oldStepCheck) {
+                    printCsv(islands, evaluationCount);
                 }
+                oldStepCheck = newStepCheck;
             }
-
             // Predict if we run out of evaluations before the end of the next iteration
             hasRunOutOfEvaluations = evaluationCount + parentCountPerIteration_ * islandAmount_ > evaluations_limit_;
         } while (!hasRunOutOfEvaluations);
+        
+        printCsv(islands, evaluationCount);
 
         // When printing to csv is enabled, prevent the end of
         // the program from adding garbage to it by printing stuff (results etc)
