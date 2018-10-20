@@ -1,15 +1,32 @@
-# evalNames=( "BentCigarFunction" "SchaffersEvaluation" )
-evalNames=( "SchaffersEvaluation" )
 
-sigmas=(0.2 0.3 0.5 0.8)
-islandNs=(1 4 10)
-epochs=(10 20 40)
-popsizes=(50 100 200)
-parentcounts=(5 10 20)
-migrationsizes=(2 5 10)
-aritys=(2 5)
-recombinationProbabilitys=(0.5 0.7)
-ks=(2 10)
+# # baseline parameters
+# popsizes=(50 100 200 400)
+# parentcounts=(2 3 4 6 12 24)
+# aritys=(2 3 4 6 12 24)
+# recombinationProbabilitys=(0.80 0.95 0.99 1.0)
+# ks=(2 3 6 12 24)
+
+# # Model extension parameters
+# # disabled for now
+# sigmas=(0)
+# islandNs=(1)
+# epochs=(99999)
+# migrationsizes=(2)
+
+# baseline parameters
+popsizes=(50 100 200 400)
+parentcounts=(24)
+aritys=(3)
+recombinationProbabilitys=(1.0)
+recombinationProbabilitys=(0.99)
+ks=(2)
+
+# Model extension parameters
+sigmas=(0.2 0.4 0.7 1.0)
+sigmas=(0.0003 0.001 0.003 0.01)
+islandNs=(1 2 4 6 12)
+epochs=(5 15 45)
+migrationsizes=(2)
 
 defaultParameters="-Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss"
 
@@ -32,45 +49,32 @@ defaultParameters="-Dparentselection=tournament -Dsurvivorselection=tournament -
 # done
 
 
-fitnessBool=true
-for islandN in "${islandNs[@]}"; do
-	if [[ $islandN -gt 1 ]]; then
-		for epoch in "${epochs[@]}"; do
-			for sigma in "${sigmas[@]}"; do
-				for migrationsize in "${migrationsizes[@]}"; do
-					for popsize in "${popsizes[@]}"; do
-						for parentcount in "${parentcounts[@]}"; do
-							for arity in "${aritys[@]}"; do
-								for recombinationProbability in "${recombinationProbabilitys[@]}"; do
-									for k in "${ks[@]}"; do
+for popsize in "${popsizes[@]}"; do
+	for parentcount in "${parentcounts[@]}"; do
+		for arity in "${aritys[@]}"; do
+			for k in "${ks[@]}"; do
+				for recombinationProbability in "${recombinationProbabilitys[@]}"; do
+					for sigma in "${sigmas[@]}"; do
+						for islandN in "${islandNs[@]}"; do
+							if [[ $islandN -gt 1 ]]; then
+								for epoch in "${epochs[@]}"; do
+									for migrationsize in "${migrationsizes[@]}"; do
 										runName="$islandN;$epoch;true;${sigma};$migrationsize;$popsize;$parentcount;$arity;${recombinationProbability};$k"
-										parameterString="-Dislands=${islandN} -Depochsize=${epoch} -Dsharefitness -Dsigma=${sigma} -Dmigrationsize=${migrationsize} -Dpopsize=${popsize} -Dparentcount=${parentcount} -Darity=${arity} -DrecombinationProbability=${recombinationProbability} -Dk=${k}"
+										parameterString="-Dpopsize=${popsize} -Dparentcount=${parentcount} -Darity=${arity} -DrecombinationProbability=${recombinationProbability} -Dk=${k} -Dsharefitness -Dsigma=${sigma} -Dislands=${islandN} -Depochsize=${epoch} -Dmigrationsize=${migrationsize} "
 										parameterString="${parameterString} $defaultParameters"
 										./test.sh $runName 10 $parameterString
 									done
 								done
-							done
-						done
-					done
-				done
-			done
-		done
-	elif [[ $islandN == 1 ]]; then
-		for sigma in "${sigmas[@]}"; do
-			for popsize in "${popsizes[@]}"; do
-				for parentcount in "${parentcounts[@]}"; do
-					for arity in "${aritys[@]}"; do
-						for recombinationProbability in "${recombinationProbabilitys[@]}"; do
-							for k in "${ks[@]}"; do
-								runName="$islandN;0;true;${sigma};$popsize;$parentcount;$arity;$recombinationProbability;$k"
-								parameterString="-Dislands=${islandN} -Dsharefitness -Dsigma=${sigma} -Dpopsize=${popsize} -Dparentcount=${parentcount} -Darity=${arity} -DrecombinationProbability=${recombinationProbability} -Dk=${k}"
+							elif [[ $islandN == 1 ]]; then
+								runName="$islandN;0;true;${sigma};0;$popsize;$parentcount;$arity;$recombinationProbability;$k"
+								parameterString="-Dpopsize=${popsize} -Dparentcount=${parentcount} -Darity=${arity} -DrecombinationProbability=${recombinationProbability} -Dk=${k} -Dsharefitness -Dsigma=${sigma} -Dislands=${islandN}"
 								parameterString="${parameterString} $defaultParameters"
 								./test.sh $runName 10 $parameterString
-							done
+							fi
 						done
 					done
 				done
 			done
 		done
-	fi
+	done
 done
