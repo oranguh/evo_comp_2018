@@ -24,7 +24,7 @@ ks=(2)
 # Model extension parameters
 sigmas=(0.2 0.4 0.7 1.0)
 sigmas=(0.0003 0.001 0.003 0.01)
-islandNs=(1 2 4 6 12)
+islandNs=(1 2 4 8)
 epochs=(5 15 45)
 migrationsizes=(2)
 
