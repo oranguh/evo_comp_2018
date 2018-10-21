@@ -1,0 +1,11 @@
+# Schaffers
+./test.sh Baseline 100          -Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss -Dpopsize=400 -Dparentcount=24 -Darity=3 -DrecombinationProbability=1.00 -Dk=2 -Dislands=1
+./test.sh FitnessSharing 100    -Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss -Dpopsize=400 -Dparentcount=24 -Darity=3 -DrecombinationProbability=1.00 -Dk=2 -Dislands=1 -Dsharefitness -Dsigma=0.05
+./test.sh Islands 100           -Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss -Dpopsize=200 -Dparentcount=24 -Darity=3 -DrecombinationProbability=1.00 -Dk=2 -Dislands=4 -Depochsize=15 -Dmigrationsize=2 
+./test.sh Both 100              -Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss -Dpopsize=400 -Dparentcount=24 -Darity=3 -DrecombinationProbability=1.00 -Dk=2 -Dislands=8 -Dsharefitness -Dsigma=0.05 -Depochsize=5 -Dmigrationsize=2
+
+# Katsuura
+./test.sh Baseline 100          -Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss -Dpopsize=400 -Dparentcount=24 -Darity=3 -DrecombinationProbability=0.99 -Dk=2 -Dislands=1
+./test.sh FitnessSharing 100    -Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss -Dpopsize=400 -Dparentcount=24 -Darity=3 -DrecombinationProbability=0.99 -Dk=2 -Dislands=1 -Dsharefitness -Dsigma=0.001
+./test.sh Islands 100           -Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss -Dpopsize=200 -Dparentcount=24 -Darity=3 -DrecombinationProbability=0.99 -Dk=2 -Dislands=4 -Depochsize=15 -Dmigrationsize=2 
+./test.sh Both 100              -Dparentselection=tournament -Dsurvivorselection=tournament -Drecombination=m-1crossover -Dmutation=adaptivegauss -Dpopsize=200 -Dparentcount=24 -Darity=3 -DrecombinationProbability=0.99 -Dk=2 -Dislands=8 -Dsharefitness -Dsigma=0.001 -Depochsize=5 -Dmigrationsize=2 
